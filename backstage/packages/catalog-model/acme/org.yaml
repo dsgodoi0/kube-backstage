@@ -1,0 +1,46 @@
+#apiVersion: backstage.io/v1alpha1
+#ind: Group
+#metadata:
+#  name: Uoledtech
+#  description: The Uoledtech organization
+#  links:
+#    - url: https://uoledtech.com.br/
+#      title: Website
+#spec:
+#  type: organization
+#  profile:
+#    displayName: Uoledtech
+#    email: contato@uoledtech.com.br
+#    picture: https://avatars.dicebear.com/api/identicon/info@example.com.svg?background=%23fff&margin=25
+#  children: [tribo-growth]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: groups
+  description: A collection of all Backstage Groups
+spec:
+  targets:
+    - ./squad-academico.yaml
+    - ./squad-aquisicao.yaml
+    - ./squad-avaliacao.yaml
+    - ./squad-conteudo.yaml
+    - ./squad-dados-pesquisa.yaml
+    - ./squad-engajamento.yaml
+    - ./squad-matrix.yaml
+    - ./squad-monetizacao-cd.yaml
+    - ./squad-payops.yaml
+    - ./squad-sales-success.yaml
+    - ./squad-financeiro.yaml
+    - ./squad-pagamentos.yaml
+    - ./squad-servicos-digitais.yaml
+    - ./tribo-growth.yaml
+    - ./tribo-core.yaml
+    - ./squad-plataforma.yaml
+    #- ./infrastructure-group.yaml
+    #- ./boxoffice-group.yaml
+    #- ./backstage-group.yaml
+    #- ./team-a-group.yaml
+    #- ./team-b-group.yaml
+    #- ./team-c-group.yaml
+    #- ./team-d-group.yaml

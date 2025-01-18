@@ -1,0 +1,1125 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-ECS-Service
+  title: Criação de ECS Service
+  description: Realize a criação de um ECS Service na AWS
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+        # Usar Somente para Multiplas Conditions
+        # type_service:
+        #   title: Back ou Front?
+        #   type: string
+        #   description: selecione o tipo de ambiente back ou front
+        #   enum: [ "back", "front" ]
+
+    - title: ECS Service 
+      required: [ resource_name, dns_name, load_balancer_arn, container_port, cluster_name, health_check_path ]
+      properties:
+          resource_name:
+            title: Service Name
+            type: string
+            description: Defina o nome do Service
+            pattern: '^(back|front)-(hub|ie)-([^-]{2}[^]*[^-]{2})-(dev|hmg|prod)$'
+            maxLength: 32
+            ui:help: 'O nome do Service deve começar com:"back" ou "front" depois "hub" ou "ie" em seguida o nome do serviço "teste-exemplo" e terminar com: "dev", "hmg" ou "prod" Exemplo: "back-ie-teste-exemplo-dev" com limite total de 32 caracteres.'
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+          dns_name:
+            title: DNS Name
+            type: string
+            description: Defina o DNS do micro serviço
+            pattern: ^(https://([^-]{2}[^]*[^-]{2})+.edtech.com.br)$
+            ui:help: 'O DNS deve começar com "https://" e terminar com ".edtech.com.br" e ter somente letras minúsculas exemplo: https://teste.edtech.com.br'
+            ui:
+              autofocus: true
+              options:
+                rows: 5 
+          vpc_id:
+            title: VPC ID
+            type: string
+            description: Insira o ID da VPC existente
+            #pattern: '^rds-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+            #ui:help: 'O nome da RDS deve começar com: "rds-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+          load_balancer_arn:
+            title: Load Balancer ARN
+            type: string
+            description: Insira o ARN do Load Balancer existente
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+          container_port:
+            title: Container Port
+            type: string
+            description: Em caso de "backend" porta:3333 caso "frontend" porta:3000
+            enum:
+              - "3333"
+              - "3000"
+          cluster_name:
+            title: Cluster Name 
+            type: string
+            description: Insira o nome do Cluster existente
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+          health_check_path:
+            title: Health Check Path 
+            type: string
+            description: Em caso de "backend" usar:/api/healthcheck em caso de "frontend" usar:/healthcheck
+            enum: ['/api/healthcheck', '/healthcheck']
+
+    - title: Job Jenkins
+      required: [ git_url, task_definition_job_name, update_service_job_name, docker_push_cred, folder_jenkins, build_job]
+      properties:
+          git_url:
+            title: GIT URL
+            type: string
+            description: Insira a Url do GIT do repositório ja criado
+            default: "-"
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+          
+          # new_relic_license_key:
+          #   title: New_relic License Key
+          #   type: string
+          #   description: Insira o New_relic License Key
+          #   default: "41561f5c9b3a85aeadaa0e039225e98aa738f13b"
+          #   ui:
+          #     autofocus: true
+          #     options:
+          #       rows: 5
+
+          task_definition_job_name:
+            title: Task Definition Job Name
+            type: string
+            description: Insira o Task Definition Job Name
+            default: "-"
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+
+          update_service_job_name:
+            title: Update Service Job Name
+            type: string
+            description: Insira o Update Service Job Name
+            default: "-"
+            ui:
+              autofocus: true
+              options:
+                rows: 5
+
+          # callback_url:
+          #   title: Callback Url
+          #   type: string
+          #   description: Defina o Callback Url (somente em caso de front)
+          #   default: "-"
+          #   ui:
+          #     autofocus: true
+          #     options:
+          #       rows: 5
+
+          # pool_id:
+          #   title: Pool ID
+          #   type: string
+          #   description: Defina o Pool ID (somente em caso de front)
+          #   default: "-"
+          #   ui:
+          #     autofocus: true
+          #     options:
+          #       rows: 5
+
+          # client_id:
+          #   title: Client ID
+          #   type: string
+          #   description: Defina o Client ID
+          #   default: "-"
+          #   ui:
+          #     autofocus: true
+          #     options:
+          #       rows: 5
+
+          # client_secret:
+          #   title: Client Secret
+          #   type: string
+          #   description: Defina o Client Secret
+          #   default: "-"
+          #   ui:
+          #     autofocus: true
+          #     options:
+          #       rows: 5
+
+          docker_push_cred:
+            title: Docker Push Cred
+            type: string
+            description: Selecione o Docker Push Cred
+            enum: [ jenkins-santa-casa-prod, jenkins-edtech-core-dev, jenkins-edtech-core-prod, jenkins-edtech-core-hmg, jenkins-ie-faap-prod, jenkins-opm-ie-uninassau-prod, jenkins-opm-core-dev , jenkins-opm-ie-hmg,jenkins-fia-hom, jenkins-pucrs-hom, jenkins-pucrs-prod, jenkins-fia-prod, jenkins-unesc-prod, jenkins-unesc-hom,	jobs-unesc,	jobs-fia, jobs-pucrs ]
+            enumNames: [ jenkins-santa-casa-prod, jenkins-edtech-core-dev, jenkins-edtech-core-prod, jenkins-edtech-core-hmg, jenkins-ie-faap-prod, jenkins-opm-ie-uninassau-prod, jenkins-opm-ie-dev, jenkins-opm-ie-hmg,jenkins-fia-hom, jenkins-pucrs-hom, jenkins-pucrs-prod, jenkins-fia-prod, jenkins-unesc-prod, jenkins-unesc-hom,	jobs-unesc,	jobs-fia, jobs-pucrs ]
+
+          folder_jenkins:
+            title: Folder Jenkins
+            type: string
+            description: Escolha em qual folder o job será criado
+            enum: [ "edtech-hub-hmg-new", "edtech-ie-hmg-new", "edtech-ie-dev", "edtech-ie-hmg", "edtech-ie-faap", "edtech-ie-pucrs", "edtech-ie-uninassau", "edtech-ie-santa-casa", "edtech-ie-unesc", "edtech-fia-hmg", "edtech-fia-prod", "edtech-hub-dev", "edtech-hub-hmg", "edtech-hub-prod", "edtech-pucrs-pos-hmg", "edtech-pucrs-pos-prod", "edtech-unesc-hmg", "edtech-unesc-prod", "newrelic-automation", "parameter-store-jobs", "Schedules", "pedidos" ]
+
+          build_job:
+            title: Build Job
+            type: string
+            description: Quer buildar o JOB após a criação?
+            default: "não"
+            enum: [ "sim", "não" ]
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          #vpc_id            : vpc-0e5b78700e8226fa9
+          subnets            : ["subnet-0a57763c40d757152","subnet-0801fdff20634df95"]
+          key                : edtech-payer/opm/ie-dev/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : ie-dev
+          # ECS
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn : ${{ parameters.load_balancer_arn }} 
+          account_name       : opm-edtech-ie-dev
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : us-east-1a, us-east-1b
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : develop
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }} 
+          # Job Jenkins
+          git_branch : develop
+          environment_type: develop
+          app_mode_api : dev
+          authentication_url: DEV
+          optional_filter_expression : DEV
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+        
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" }} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-052886cd3a4a3e7a1
+          subnets                    : ["subnet-0ecc1f337ea83079c","subnet-02eb326d5308933e9"]     
+          key                        : edtech-payer/opm/ie-hmg/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : ie-hmg
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn : ${{ parameters.load_balancer_arn }} 
+          account_name       : opm-edtech-ie-hmg
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b"          
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : homolog
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins
+          git_branch : homolog
+          environment_type: homolog
+          app_mode_api : hmg
+          authentication_url: HMG
+          optional_filter_expression : .*homolog
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-0da2cd947dca3a599
+          subnets                    : ["subnet-08bbc217a8cd11fe7","subnet-0b16ae9aa6ad23352"]     
+          key                        : edtech-payer/opm/hub-dev/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : hub-dev
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn : ${{ parameters.load_balancer_arn }} 
+          account_name       : opm-edtech-hub-dev
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : us-east-1a, us-east-1b
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : develop
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins
+          git_branch : develop
+          environment_type: develop
+          app_mode_api : dev
+          authentication_url: DEV
+          optional_filter_expression : DEV
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-084594573c4168e25
+          subnets                    : ["subnet-001a02d72b2689241","subnet-0275632ca05cb970d"]   
+          key                        : edtech-payer/opm/hub-hmg/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : hub-hmg
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn : ${{ parameters.load_balancer_arn }}
+          account_name       : "opm-edtech-hub-hmg"
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : homolog
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins
+          git_branch : homolog
+          environment_type: homolog
+          app_mode_api : hmg
+          authentication_url: HMG
+          optional_filter_expression : homolog
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #hub-prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-084594573c4168e25
+          subnets                    : ["subnet-001a02d72b2689241","subnet-0275632ca05cb970d"]   
+          key                        : edtech-payer/opm/hub-prod/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : hub-prod
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }} 
+          account_name       : "opm-edtech-hub-prod"
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-036ce5b424075c72b
+          subnets                    : ["subnet-0eaf837f20697cac9","subnet-00d7292ad3dc92021", "subnet-0b5eecab0a434700c"]
+          key                        : edtech-payer/opm/ie-pucrs/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : pucrs-prod
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opm-edtech-ie-pucrs-prod
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : us-east-1a, us-east-1b, us-east-1c
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-02f084583839458de
+          subnets                    : ["subnet-078c9c393d43d512a","subnet-078757a29f89439e7", "subnet-0dc6dd606f63fe5ab"]
+          key                        : edtech-payer/opm/ie-faap/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : faap-prod
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn : ${{ parameters.load_balancer_arn }}
+          account_name       : opm-edtech-ie-faap-prod
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "592353520627" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id                 : ${{ parameters.account_id }}
+          vpc_id                     : ${{ parameters.vpc_id }}
+          #vpc_id                    : vpc-00927db38c9ba6864
+          subnets                    : ["subnet-090ee5072ebf2bc46","subnet-06a83896f736b9ce6", "subnet-0996ea88d82cc39d3"]
+          key                        : edtech-payer/opm/ie-uninassau/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                        : uninassau-prod
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn : ${{ parameters.load_balancer_arn }}
+          account_name       : opm-edtech-ie-uninassau-prod
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #IE Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          key                : edtech-payer/opm/ie-santa-casa/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : santa-casa
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opm-ie-santa-casa-prod
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #IE UNESC
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          key                : edtech-payer/opm/ie-unesc/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : unesc
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opm-ie-unesc-prod
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "948424637866" }} #PUC POS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          key                : edtech-payer/opm/pucrs-pos-prod/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opmpucrs
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+
+    - id: template
+      if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          key                : edtech-payer/opm/pucrs-pos-hmg/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opmpucrs
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : "opm"
+          ambiente           : "homolog"
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+          
+    - id: template
+      if: ${{ parameters.account_id === "192393990768" }} #FIA POS PROD
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          key                : edtech-payer/opm/fia-pos-prod/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opmfia
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+      
+    - id: template
+      if: ${{ parameters.account_id === "579579651374" }} #FIA POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+        values:
+          account_id         : ${{ parameters.account_id }}
+          vpc_id             : ${{ parameters.vpc_id }}
+          key                : edtech-payer/opm/fia-pos-hmg/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+          #
+          resource_name      : ${{ parameters.resource_name }}
+          dns_name           : ${{ parameters.dns_name }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_name       : opmfia
+          container_port     : ${{ parameters.container_port }}
+          cluster_name       : ${{ parameters.cluster_name }}
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          min_capacity       : ${{ parameters.min_capacity }} 
+          health_check_path  : ${{ parameters.health_check_path }}
+          area               : "opm"
+          ambiente           : "homolog"
+          subarea            : ${{ parameters.subarea }} # ${{ parameters.subarea }}
+          # Job Jenkins          
+          git_branch : main
+          environment_type: production
+          app_mode_api : prod
+          authentication_url: PROD
+          optional_filter_expression : main
+          git_url                    : ${{ parameters.git_url }}
+          #new_relic_license_key      : ${{ parameters.new_relic_license_key }}
+          task_definition_job_name   : ${{ parameters.task_definition_job_name }}
+          update_service_job_name    : ${{ parameters.update_service_job_name }}
+          #callback_url               : ${{ parameters.callback_url }}
+          #pool_id                    : ${{ parameters.pool_id }}
+          #client_id                  : ${{ parameters.client_id }}
+          #client_secret              : ${{ parameters.client_secret }}
+          docker_push_cred           : ecr:us-east-1:${{ parameters.docker_push_cred }}
+          folder_jenkins             : ${{ parameters.folder_jenkins }}
+          build_job                  : ${{ parameters.build_job }}
+          #service_name               : svc-${{ parameters.resource_name }}
+          #task_role                  : ${{ parameters.resource_name }}-TaskRole
+          #task_family                : task-${{ parameters.resource_name }}
+          #container_name             : container-${{ parameters.resource_name }}
+          #new_relic_app_name         : ECS-${{ parameters.dns_name}}
+          #environment                : opm-${{ parameters.resource_name }}
+          #container_log_name         : ${{ parameters.account_name }}/${{ parameters.cluster_name }}/svc-${{ parameters.resource_name }}
+          #http_host                  : ${{ parameters.dns_name }}
+          
+          
+
+    #####################################
+    #          TESTE IF/ELSE - IE-DEV
+    #####################################
+    # - id: template
+    #   if: ${{ parameters.account_id === "002382960105" and parameters.type_service === "back"}} #ie-dev
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-service/blob/main/modelo-novo/module/skeleton/
+    #     values:
+    #       account_id         : ${{ parameters.account_id }}
+    #       #vpc_id            : vpc-0e5b78700e8226fa9
+    #       subnets            : ["subnet-0a57763c40d757152","subnet-0801fdff20634df95"]
+    #       key                : edtech-payer/opm/ie-dev/backstage/ecs-service/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : ie-dev
+    #       #
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       dns_name           : ${{ parameters.dns_name }}
+    
+    #       account_name       : opm-edtech-ie-dev
+    #       container_port     : ${{ parameters.container_port }}
+    #       cluster_name       : ${{ parameters.cluster_name }}
+    #       availability_zones : us-east-1a, us-east-1b
+    #       
+    #       
+    #       min_capacity       : ${{ parameters.min_capacity }} 
+    #       health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : develop
+    #       subarea            : ${{ parameters.subarea }} # ie
+    #####################################
+    #          TESTE IF/ELSE - IE-DEV
+    #####################################
+
+    # - id: backstage_request_post
+    #   name: backstage request
+    #   action: http:backstage:request
+    #   input:
+    #     method: 'POST'
+    #     path: '/proxy/post_edtech_hub_job_jenkins/job'
+    #     headers:
+    #       content-type: 'application/json'
+    #     body:
+    #       job_name: ${{ parameters.JOB_NAME }}
+    #       git_url: ${{ parameters.GIT_URL }}
+    #       repo_name: ${{ parameters.REPO_NAME }}
+    #       account_id: ${{ parameters.ACCOUNT_ID }}
+    #       account_name: ${{ parameters.ACCOUNT_NAME }}
+    #       region: ${{ parameters.us-east-1 }}
+    #       cluster_name: ${{ parameters.CLUSTER_NAME }}
+    #       service_name: ${{ parameters.SERVICE_NAME }}
+    #       task_role: ${{ parameters.TASK_ROLE }}
+    #       desired_count: ${{ parameters.DESIRED_COUNT }}
+    #       task_family: ${{ parameters.TASK_FAMILY }}
+    #       git_branch: ${{ parameters.GIT_BRANCH }}
+    #       container_name: ${{ parameters.CONTAINER_NAME }}
+    #       new_relic_app_name: ${{ parameters.NEW_RELIC_APP_NAME }}
+    #       environment: ${{ parameters.ENVIRONMENT }}
+    #       new_relic_license_key: ${{ parameters.NEW_RELIC_LICENSE_KEY }}
+    #       container_stream_prefix: ${{ parameters.CONTAINER_STREAM_PREFIX }}
+    #       container_log_name: ${{ parameters.CONTAINER_LOG_NAME }}
+    #       network_mode: ${{ parameters.bridge }}
+    #       compatibilities: ${{ parameters.COMPATIBILITIES }}
+    #       environment_type: ${{ parameters.ENVIRONMENT_TYPE }}
+    #       docker_push_cred: ecr:us-east-1:${{ parameters.docker_PUSH_CRED }}
+    #       task_definition_job_name: ${{ parameters.TASK_DEFINITION_JOB_NAME }}
+    #       update_service_job_name: ${{ parameters.UPDATE_SERVICE_JOB_NAME }}
+    #       http_host: ${{ parameters.HTTP_HOST }}
+    #       new_relic_log_level: ${{ parameters.NEW_RELIC_LOG_LEVEL }}
+    #       container_cpu: ${{ parameters.CONTAINER_CPU }}
+    #       container_memory: ${{ parameters.CONTAINER_MEMORY }}
+    #       react_app_api_host: ${{ parameters.REACT_APP_API_HOST }}
+    #       s3_env_path: ${{ parameters.S3_ENV_PATH }}
+    #       s3_profile: ${{ parameters.S3_PROFILE }}
+    #       app_mode_api: ${{ parameters.APP_MODE_API }}
+    #       ambiente: ${{ parameters.AMBIENTE }}
+    #       callback_url: ${{ parameters.CALLBACK_URL }}
+    #       pool_id: ${{ parameters.POOL_ID }}
+    #       client_id: ${{ parameters.CLIENT_ID }}
+    #       client_secret: ${{ parameters.CLIENT_SECRET }}
+    #       authentication_url: ${{ parameters.AUTHENTICATION_URL }}
+    #       sonarqube_project_key: ${{ parameters.SONARQUBE_PROJECT_KEY }}
+    #       optional_filter_expression: ${{ parameters.OPTIONAL_FILTER_EXPRESSION }}
+    #       token: ${{ parameters.TOKEN }}
+    #       build: ${{ parameters.BUILD }}
+    #       folder: ${{ parameters.FOLDER }}
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+
+    
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.resource_name }}'
+        title: '🔩 Create ${{ parameters.resource_name }} AWS ECS Service'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+
+          | Recurso | Name |
+          | ------  | ---- |
+          | ECS Service  | ${{ parameters.resource_name }} 
+          | DNS          | https://${{ parameters.dns_name }}.edtech.com.br 
+          | Job Jenkins  | /${{ parameters.folder_jenkins }}/${{ parameters.resource_name }}
+          | Squad        | ${{ parameters.grupo }}
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d tf-aws-${{ parameters.subarea }}/services/microservices/tf-${{ parameters.resource_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d tf-aws-${{ parameters.subarea }}/services/microservices/tf-${{ parameters.resource_name }}
+          ```
+
+        sourcePath: ./
+        #targetPath: ecs-service/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+        targetPath: tf-aws-${{ parameters.subarea }}/services/microservices/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github

@@ -1,0 +1,91 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Parameter
+  title: Consulta Parameter
+  description: Realize a consulta de parameters por ambiente
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - Proxy
+      properties:
+        Proxy:
+          title: Selecione o Ambiente de Conculta
+          type: string
+          description: selecione um dos ambientes para realizar a consulta do parameter desejado
+          enum:
+            - /proxy/get_ie_dev/parameters
+            - /proxy/get_ie_hmg/parameters
+            - /proxy/get_hub_dev/parameters
+            - /proxy/get_hub_hmg/parameters
+          enumNames:
+            - 'IE-Dev'
+            - 'IE-Hmg'
+            - 'Hub-Dev'
+            - 'Hub-Hmg'
+
+  
+    - title: Parameter
+      required:
+        - Path
+      properties:
+        Path:
+          title: Path Parameter
+          type: string
+          description: adiocione o parameter que deseja consultar
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+  steps:  
+    - id: backstage_request
+      name: backstage request
+      action: http:backstage:request
+      input:
+        method: 'GET'
+        path: '${{ parameters.Proxy }}'
+        headers:
+          content-type: 'application/json'
+          value: '${{ parameters.Path }}'
+
+    #- id: backstage_request_post
+    #  name: backstage request
+    #  action: http:backstage:request
+    #  input:
+    #    method: 'POST'
+    #    path: '/proxy/post'
+    #    headers:
+    #      content-type: 'application/json'
+    #    body:
+    #      name: 'test'
+    #      bar: 'foo'
+          
+    - id: log-message
+      name: Log Message
+      action: debug:log
+      input:
+        Result: ${{ steps.backstage_request.output.body }}
+
+
+  output:
+    getResponse: '{{ steps.backstage_request.output.body }}'
+    getCode: '{{ steps.backstage_request.output.code }}'
+    getHeaders: '{{ steps.backstage_request.output.headers }}'

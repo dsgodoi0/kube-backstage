@@ -1,0 +1,439 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Rest-API
+  title: Criação Rest API
+  description: Realize a criação de Rest API + Policy + Domain Name + Path Mapping
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+            
+    - title: Rest API
+      required: [ resource_name ]
+      properties:
+        resource_name:
+          title: API Gateway
+          type: string
+          description: Defina o nome do API Gateway
+          maxLength: 25
+          pattern: ^(api)-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$
+          ui:help: 'O nome deve conter no máximo 25 caracteres e iniciar com: "api" e precisa terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+            rows: 5
+
+    # - title: Choose a location
+    #   required:
+    #     - repoUrl
+    #   properties:
+    #     repoUrl:
+    #       title: Repository Location
+    #       type: string
+    #       ui:field: RepoUrlPicker
+    #       ui:options:
+    #         allowedHosts:
+    #           - github.com
+    #         allowedOwners:
+    #           - uoledtech-infra-as-code
+    #         allowedRepos:
+    #           - repositorio-versionamento
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/ie-dev/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : ie-dev
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : develop
+          subarea            : ${{ parameters.subarea }} # ie 
+      
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" }} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #  
+          key                : edtech-payer/opm/ie-hmg/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : ie-hmg
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : homolog
+          subarea            : ${{ parameters.subarea }} # ie
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #  
+          key                : edtech-payer/opm/hub-dev/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : hub-dev
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : develop
+          subarea            : ${{ parameters.subarea }} # hub
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          # 
+          key                : edtech-payer/opm/hub-hmg/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : hub-hmg      
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : homolog
+          subarea            : ${{ parameters.subarea }} # hub
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #hub-prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/hub-prod/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : hub-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # hub
+          
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/ie-pucrs/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : pucrs-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # puc-grad
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/ie-faap/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : faap-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # faap
+
+    - id: template
+      if: ${{ parameters.account_id === "592353520627" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/ie-uninassau/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : uninassau-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # uninassau
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/ie-santa-casa/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : santa-casa
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # "santa-casa"
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          account_id         : ${{ parameters.account_id }}
+          #
+          key                : edtech-payer/opm/ie-unesc/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : unesc
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # "unesc"
+
+    # - id: template
+    #   if: ${{ parameters.account_id === ""948424637866"" }} #PUC POS
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+    #     values:
+    #      resource_name      : ${{ parameters.resource_name }}
+    #      account_id         : ${{ parameters.account_id }}
+    #
+    #       #vpc_id             : vpc-0398eccfb4bf5d0ae
+    #       #subnets            : ["subnet-02012f229f338cbb9","subnet-0c204d0215253ed28", "subnet-08f6efa90b4a190b7"]
+    #       key                : edtech-payer/opm/pucrs-pos-prod/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : pucrs-pos-prod
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : production
+    #       subarea            : ${{ parameters.subarea }} # pucrs-pos
+
+
+    # - id: template
+    #   if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+    #     values:
+    #      resource_name      : ${{ parameters.resource_name }}
+    #      account_id         : ${{ parameters.account_id }}
+    #
+    #       #vpc_id             : vpc-018a34681e165085e
+    #       #subnets            : ["subnet-0af984773eff8f5ca","subnet-0e2d86330be7b67b3"]
+    #       key                : edtech-payer/opm/pucrs-pos-hmg/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : pucrs-pos-hmg
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : us-east-1a, us-east-1b
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : homolog
+    #       subarea            : ${{ parameters.subarea }} # pucrs-pos
+
+    # - id: template
+    #   if: ${{ parameters.account_id === "192393990768" }} #FIA
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+    #     values:
+    #      resource_name      : ${{ parameters.resource_name }}
+    #      account_id         : ${{ parameters.account_id }}
+    #
+    #       #vpc_id             : vpc-00f0fc985f6bd1322
+    #       #subnets            : ["subnet-021f17532485a3fe9","subnet-0dd547465c3f1be8b", "subnet-05974476c1e89d684"]
+    #       key                : edtech-payer/opm/fia-pos-prod/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : fia-prod
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : production
+    #       subarea            : ${{ parameters.subarea }} # fia
+
+    # - id: template
+    #   if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: https://github.com/uoledtech-infra-as-code/tf-aws-api-gateway/blob/main/api-gateway/module/skeleton/
+    #     values:
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       rest_api_id     : ${{ parameters.rest_api_id }}
+    #       parent_id          : ${{ parameters.parent_id }}
+    #       account_id         : ${{ parameters.account_id }}
+    #       api_key_id         : ${{ parameters.api_key_id }}
+    #       api_key_required   : ${{ parameters.api_key_required }}
+    #       authorization_type : ${{ parameters.authorization_type }}
+    #       integration_url    : ${{ parameters.integration_url }}
+    #       sqs_queue_name     : ${{ parameters.sqs_queue_name }}
+    #
+    #       #vpc_id             : vpc-01c25bcb6673a9628
+    #       #subnets            : ["subnet-07b1b51ba7a0fd5fb","subnet-0ebfeedad1707d2d9"]
+    #       key                : edtech-payer/opm/fia-pos-hmg/backstage/rest_api/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : fia-hmg
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : us-east-1a, us-east-1b
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : homolog
+    #       subarea            : ${{ parameters.subarea }} # fia
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+  
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.resource_name }}'
+        title: '🔩 Create AWS API Gateway + Host Header + Listener Rule'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+
+          |        |		   |
+          | ------ | ----- |
+          | API Gateway | ${{ parameters.resource_name }}
+          | Ambiente    | ${{ parameters.ambiente }}
+          | Squad       | ${{ parameters.grupo }}
+ 
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d tf-aws-${{ parameters.subarea }}/globals/api-gateway/api-gateway/tf-${{ parameters.resource_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d tf-aws-${{ parameters.subarea }}/globals/api-gateway/api-gateway/tf-${{ parameters.resource_name }}
+          ```
+
+        sourcePath: ./
+        #targetPath: rest_api/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+        targetPath: tf-aws-${{ parameters.subarea }}/globals/api-gateway/api-gateway/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github

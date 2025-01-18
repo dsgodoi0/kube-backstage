@@ -1,0 +1,25 @@
+    apiVersion: backstage.io/v1alpha1
+    kind: API
+    metadata:
+      name: ECS-front-instituicao-ensino-prod
+      description: Tribo Core
+      tags:
+        - nestjs
+        - javascript
+        - node-16-13-1-alpine3-14
+      links:
+        - url: https://github.com/uoledtech-opm/instituicao-ensino-hub-corp-frontend//tree/main
+          title: GitHub Main
+          icon: github
+        - url: https://github.com/uoledtech-opm/instituicao-ensino-hub-corp-frontend//tree/homolog
+          title: GitHub Homolog
+          icon: github
+        - url: https://github.com/uoledtech-opm/instituicao-ensino-hub-corp-frontend//tree/develop
+          title: GitHub Develop
+          icon: github
+    spec:
+      type: service
+      lifecycle: production
+      owner: tribo-core
+      definition:
+        $text: ./ecs-front-instituicao-ensino.yaml

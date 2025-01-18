@@ -1,0 +1,679 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-SQS
+  title: Criação de SQS
+  description: Realize a criação de fila SQS
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+                 
+    - title: SQS Queue
+      required:
+        - resource_name
+        - repo_sqs
+      properties:
+        resource_name:
+          title: Resource Name
+          type: string
+          description: Resource Name
+          pattern: ^(?!sqs)+(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$
+          ui:help: 'O nome não pode conter: "sqs" e precisa terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+              
+        repo_sqs:
+          title: Tipo de SQS
+          description: Selecione uma das opções
+          default: false
+          type: string
+          enum:
+            - https://github.com/uoledtech-infra-as-code/tf-aws-sqs/tree/main/sqs-principal-only/module/skeleton/
+            - https://github.com/uoledtech-infra-as-code/tf-aws-sqs/blob/main/sqs-principal-plus-dlq/module/skeleton/
+          enumNames:
+            - 'SQS'
+            - 'SQS com DLQ'
+        
+        fifo_queue:
+          title: FIFO Queue (First-In-First-Out)
+          description: Marque em caso de FIFO
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+        
+        content_based_deduplication:
+          title: Content Based Deduplication
+          description: Content Based Duplication
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+
+    - title: Publisher
+      required:
+        - publisher_account_number
+        - publisher_sqs_role_arn
+      properties:
+        publisher_account_number:
+          title: Selecione a Conta Publisher
+          type: string
+          description: selecione o ambiente publisher 
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+        # publisher_ms:
+        #     title: URL Services
+        #     type: string
+        #     description: selecione o ambiente consumer 
+        #     enum:
+        #       - https://api-services-ie-dev.edtech.com.br/ecs
+        #       - https://api-services-ie-hmg.edtech.com.br/ecs
+        #       - https://api-services-hub-hmg.edtech.com.br/ecs
+        #       - https://api-services-hub-dev.edtech.com.br/ecs
+        # publisher_sqs_role_arn:
+        #   title: Micro Service Publisher
+        #   type: string
+        #   ui:field: DynamicPickExtension
+        #   ui:options:
+        #       external_data: ${{ parameters.publisher_ms }}
+
+        publisher_sqs_role_arn:
+          title: Micro Service Publisher
+          type: string
+          description: Insira o nome do Micro Service já existente
+          pattern: '^(?!.*svc)(?!.*Svc)(?!.*SVC)(?!.*Task-Role)(?!.*task-role)(?!.*TASK-ROLE)(?!.*TASKROLE)(?!.*taskrole)(?!.*TaskRole).*'
+          ui:help: 'Insira somente o nome do serviço. Não adicione ao nome: "svc" ou "task role"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+   
+    - title: Consumer
+      required:
+        - consumer_account_number
+        - consumer_sqs_role_arn
+      properties:
+        consumer_account_number:
+          title: Selecione a Conta Consumer
+          type: string
+          description: selecione o ambiente consumer 
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+        # consumer_ms:
+        #     title: URL Services
+        #     type: string
+        #     description: selecione o ambiente consumer 
+        #     enum:
+        #       - https://api-services-ie-dev.edtech.com.br/ecs
+        #       - https://api-services-ie-hmg.edtech.com.br/ecs
+        #       - https://api-services-hub-hmg.edtech.com.br/ecs
+        #       - https://api-services-hub-dev.edtech.com.br/ecs
+        # consumer_sqs_role_arn:
+        #     title: Micro Service Consumer
+        #     type: string
+        #     ui:field: DynamicPickExtension
+        #     ui:options:
+        #         external_data: ${{ parameters.consumer_ms }}
+
+        consumer_sqs_role_arn:
+          title: Micro Service Publisher
+          type: string
+          description: Insira o nome do Micro Service já existente
+          pattern: '^(?!.*svc)(?!.*Svc)(?!.*SVC)(?!.*Task-Role)(?!.*task-role)(?!.*TASK-ROLE)(?!.*TASKROLE)(?!.*taskrole)(?!.*TaskRole).*'
+          ui:help: 'Insira somente o nome do serviço. Não adicione ao nome: "svc" ou "task-role"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "develop"
+          subarea            : ${{ parameters.subarea }} # "ie"
+          key                           : "edtech-payer/opm/ie-dev/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" }} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "ie"
+          key                           : "edtech-payer/opm/ie-hmg/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "develop"
+          subarea            : ${{ parameters.subarea }} # "hub"
+          key                           : "edtech-payer/opm/hub-dev/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "hub"
+          key                           : "edtech-payer/opm/hub-hmg/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "puc-grad"
+          key                           : "edtech-payer/opm/puc-grad/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "faap-prod"
+          key                           : "edtech-payer/opm/ie-faap/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "592353520627" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "uninassau-prod"
+          key                           : "edtech-payer/opm/ie-uninassau/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #IE - Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "santa-casa"
+          key                           : "edtech-payer/opm/ie-santa-casa/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "948424637866" }} #PUC POS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "pucrs-pos-prod"
+          key                           : "edtech-payer/opm/pucrs-pos-prod/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "pucrs-pos-hmg"
+          key                           : "edtech-payer/opm/pucrs-pos-hmg/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "192393990768" }} #FIA
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "fia"
+          key                           : "edtech-payer/opm/fia/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "fia-hmg"
+          key                           : "edtech-payer/opm/fia-pos-hmg/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #hub-prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "hub-prod"
+          key                           : "edtech-payer/opm/hub-prod/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repo_sqs }}
+        values:
+          resource_name                 : "${{ parameters.resource_name }}"
+          fifo_queue                    : "${{ parameters.fifo_queue }}"
+          account_id                    : "${{ parameters.account_id }}"
+          content_based_deduplication   : "${{ parameters.content_based_deduplication }}"
+          delay_seconds                 : "0"
+          max_message_size              : "262144"
+          message_retention_seconds     : "345600"
+          receive_wait_time_seconds     : "0"
+          dlq_message_retention_seconds : "1209600"
+          consumer_sqs_role_arn         : "${{ parameters.consumer_sqs_role_arn }}-TaskRole"
+          consumer_account_number       : "${{ parameters.consumer_account_number }}"
+          publisher_sqs_role_arn        : "${{ parameters.publisher_sqs_role_arn }}-TaskRole"
+          publisher_account_number      : "${{ parameters.publisher_account_number }}"
+          area                          : "opm"
+          ambiente                      : "production"
+          subarea            : ${{ parameters.subarea }} # "unesc"
+          key                           : "edtech-payer/opm/ie-unesc/backstage/sqs/${{ parameters.resource_name }}/terraform.tfstate"
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+  
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.resource_name }}'
+        title: '🔩 Create ${{ parameters.resource_name }} AWS SQS'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+
+          |        |		   |
+          | ------ | ----- |
+          | SQS                         | ${{ parameters.resource_name }}
+          | Fifo Queue                  | ${{ parameters.fifo_queue }} 
+          | Content Based Deduplication | ${{ parameters.content_based_deduplication }}
+          | MS Publisher                | ${{ parameters.publisher_sqs_role_arn }}
+          | MS Consumer                 | ${{ parameters.consumer_sqs_role_arn }}
+          | Ambiente                    | ${{ parameters.ambiente }}
+          | Squad                       | ${{ parameters.grupo }}
+ 
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d sqs/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d sqs/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+          ```
+
+        sourcePath: ./
+        targetPath: sqs/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+        #targetPath: tf-aws-${{ parameters.subarea }}/globals/sqs/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github

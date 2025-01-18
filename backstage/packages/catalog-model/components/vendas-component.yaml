@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: checkout
+  description: Checkout de Vendas Campus Digital
+  tags:
+    - nodejs
+    - nextjs
+    - javascript
+spec:
+  type: service
+  lifecycle: production
+  owner: tribo-growth
+  system: vendas-cd
+  providesApis:
+    - ECS-back-vendas-bff
+    - ECS-back-vendas-contratos
+    - ECS-back-vendas-hubspot
+    - ECS-back-vendas-integracao-adyen
+    - ECS-back-vendas-pedido.yaml

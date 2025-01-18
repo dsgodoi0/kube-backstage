@@ -1,0 +1,37 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ECS-back-adm-ead-object-integration
+  description: Squad Conteúdo
+  tags:
+    - nestjs
+    - javascript
+    - node-18-alpine3-18
+  links:
+    - url: https://back-hub-object-integra-dev.edtech.com.br
+      title: URI Develop
+      icon: code
+    - url: https://back-object-integration-hmg.edtech.com.br
+      title: URI Homolog
+      icon: code
+    - url: https://back-hub-object-integra-dev.edtech.com.br/api/docs
+      title: Swagger Develop
+      icon: code
+    - url: https://back-object-integration-hmg.edtech.com.br/api/docs
+      title: Swagger Homolog
+      icon: code
+    - url: https://github.com/uoledtech-opm/object-integration-hub-corp-backend/tree/main
+      title: GitHub Main
+      icon: github
+    - url: https://github.com/uoledtech-opm/object-integration-hub-corp-backend/tree/homolog
+      title: GitHub Homolog
+      icon: github
+    - url: https://github.com/uoledtech-opm/object-integration-hub-corp-backend/tree/develop
+      title: GitHub Develop
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: squad-conteudo
+  definition:
+    $text: ./ecs-back-adm-ead-object-integration.yaml

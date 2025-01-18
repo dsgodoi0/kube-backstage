@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ECS-back-vendas-integracao-pagamento
+  description: Squad Aquisição
+  tags:
+    - nestjs
+    - javascript
+    - node
+  links:
+    - url: https://back-hub-gtw-pagamento-dev.edtech.com.br/api/docs/
+      title: Swagger
+      icon: code
+    - url: https://github.com/uoledtech-opm/gateway-pagamento-hub-vendas-backend
+      title: GitHub Repo
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: squad-aquisicao
+  definition:
+    $text: ./ecs-back-vendas-integracao-pagamento.yaml

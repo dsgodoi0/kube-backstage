@@ -1,0 +1,483 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Lambda-SQS
+  title: Criação de Lambda + SQS
+  description: Realize a criação de um Lambda + SQS na AWS
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+
+    - title: Lambda
+      required: [ lambda_name, lambda_runtime ]
+      properties:
+        lambda_name:
+          title: Lambda Name
+          type: string
+          description: Defina um nome para o Lambda
+          pattern: '^lambda-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+          ui:help: 'O nome do lambda deve começar com: "lambda-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        lambda_runtime:
+          title: Runtime
+          type: string
+          description: Seleciona a runtime que deseja utilizar
+          enum: [ nodejs20.x, nodejs18.x, nodejs16.x, python3.12, python3.11 ]
+
+    - title: SQS Queue
+      required: [ queue_arn ]
+      properties:
+        queue_arn:
+          title: SQS Queue ARN
+          type: string
+          description: Insira o ARN da Fila SQS existente
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+    # - title: Choose a location
+    #   required:
+    #     - repoUrl
+    #   properties:
+    #     repoUrl:
+    #       title: Repository Location
+    #       type: string
+    #       ui:field: RepoUrlPicker
+    #       ui:options:
+    #         # Here's the option you can pass to the RepoUrlPicker
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #           additionalScopes:
+    #             github:
+    #               - workflow
+    #         allowedHosts:
+    #           - github.com
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-0e5b78700e8226fa9"
+          key                        : "edtech-payer/opm/ie-dev/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "ie-dev"
+        
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" === "front"}} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-052886cd3a4a3e7a1"    
+          key                        : "edtech-payer/opm/ie-hmg/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "ie-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" ===  }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-0e5b78700e8226fa9"    
+          key                        : "edtech-payer/opm/ie-dev/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "ie-dev"
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-0da2cd947dca3a599"     
+          key                        : "edtech-payer/opm/hub-dev/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "hub-dev"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-084594573c4168e25"    
+          key                        : "edtech-payer/opm/hub-hmg/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "hub-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-036ce5b424075c72b"
+          key                        : "edtech-payer/opm/ie-pucrs/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "pucrs-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-02f084583839458de"
+          key                        : "edtech-payer/opm/ie-faap/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "faap-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-00927db38c9ba6864"
+          key                        : "edtech-payer/opm/ie-uninassau/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "uninassau-prod"
+    
+    - id: template
+      if: ${{ parameters.account_id === ""948424637866"" }} #PUC POS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-0398eccfb4bf5d0ae"
+          key                        : "edtech-payer/opm/pucrs-pos-prod/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "pucrs-pos-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-018a34681e165085e"
+          key                        : "edtech-payer/opm/pucrs-pos-hmg/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "pucrs-pos-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "192393990768" }} #FIA
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-00f0fc985f6bd1322"
+          key                        : "edtech-payer/opm/fia-pos-prod/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "fia-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-01c25bcb6673a9628"
+          key                        : "edtech-payer/opm/fia-pos-hmg/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "fia-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : "vpc-0acd217cf8103c7f2"
+          key                        : "edtech-payer/opm/ie-santa-casa/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "santa-casa"
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/
+        values:
+
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          queue_arn                  : "${{ parameters.queue_arn }}"
+          sg_name                    : "${{ parameters.lambda_name }}"
+          vpc_id                     : ""
+          key                        : "edtech-payer/opm/ie-unesc/backstage/lambda_sqs/${{ parameters.lambda_name }}/terraform.tfstate"
+          tag                        : "unesc"
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+
+    - id: copy_lambda_function_zip
+      name: Copy zip files
+      action: fetch:plain
+      input:
+        url: https://github.com/uoledtech-opm/tf-aws-lambda/blob/main/lambda-without-access-vpc-sqs/example/skeleton/zip/
+        targetPath: ./
+    
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.lambda_name }}'
+        title: '🔩 Create ${{ parameters.lambda_name }} AWS Lambda + SQS '
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+          
+          |        |		   |
+          | ------ | ----- |
+          | Lambda       | ${{ parameters.lambda_name }} 
+          | Runtime      | ${{ parameters.lambda_runtime }} 
+          | SQS Arn      | ${{ parameters.queue_arn }}
+          | Squad        | ${{ parameters.grupo }}
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d lambda/lambda-vpc-and-sqs/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.lambda_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d lambda/lambda-vpc-and-sqs/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.lambda_name }}
+          ```
+
+        #description: '${{ parameters.grupo }} | user: ${{ secrets.USER_OAUTH_TOKEN }}'
+        #commitMessage: 'atlantis plan -d lambda/lambda-vpc-and-sqs/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.lambda_name }}'
+        sourcePath: ./
+        targetPath: lambda/lambda-vpc-and-sqs/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.lambda_name }}
+        #targetPath: tf-aws-${{ parameters.subarea }}/globals/lambda/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github
+      - title: 'To view more check documentation'
+        icon: docs
+        url: ${{ steps.template.tag }}

@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ECS-back-opm-comunicacao
+  description: Tribo Growth
+  tags:
+    - nestjs
+    - javascript
+    - node-16-alpine
+  links:
+    - url: https://back-ie-comunicacao-dev.edtech.com.br
+      title: URI Develop
+      icon: code
+    - url: https://back-comunicacao-ie-hmg.edtech.com.br
+      title: URI Homolog
+      icon: code
+    - url: https://back-ie-comunicacao-dev.edtech.com.br/api/docs/
+      title: Swagger
+      icon: code
+    - url: https://github.com/uoledtech-opm/comunicacao-ie-backend
+      title: GitHub Repo
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: tribo-growth
+  definition:
+    $text: ./ecs-back-opm-comunicacao.yaml

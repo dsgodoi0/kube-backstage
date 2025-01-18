@@ -1,0 +1,516 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Aplication-Load-Balancer-All-Resources
+  title: Criação de Aplication Load Balancer All Resources
+  description: Realize a criação de Aplication Load Balancer com todos os recursos em unico módulo
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+            
+    - title: Aplication Load Balancer
+      required: [ resource_name, repositorio, container_port, load_balancer_arn, health_check_path, alb_internal ]
+      properties:
+        resource_name:
+          title: Resource Name
+          type: string
+          description: Resource Name
+          pattern: ^(backend|frontend)-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$
+          ui:help: 'O nome deve iniciar com: "backend" ou "frontend" e precisa terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+            rows: 5
+        repositorio:
+          title: Listener Rule
+          type: string
+          description: Caso de back :3333 em caso de front :3000   
+          enum: ['https://github.com/uoledtech-infra-as-code/tf-aws-load-balancer/blob/main/listener-rule-443%2Btarget-group/dns-integration/module/skeleton/', 'https://github.com/uoledtech-infra-as-code/tf-aws-load-balancer/blob/main/listener-rule-443%2Btarget-group/cloudfront-integration/module/skeleton/']
+          enumNames: ["backend", "frontend"]
+        container_port:
+          title: Listener Rule
+          type: string
+          description: Caso de back :3333 em caso de front :3000   
+          enum: ["3333", "3000"]
+        load_balancer_arn:
+          title: Load Balancer Arn
+          type: string
+          description: load_balancer_arn
+          #pattern: ^(back|front)-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$
+          #ui:help: 'O nome deve iniciar com: "back" ou "front" e precisa terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+            rows: 5
+        health_check_path:
+          title: Health Check Path 
+          type: string
+          description: Se "Back" usar:/api/healthcheck Caso "Front" usar:/healthcheck
+          enum: ['/api/healthcheck', '/healthcheck']
+        alb_internal:
+          title: Load Balancer Internal
+          description: Marque em caso de Internal
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-0e5b78700e8226fa9
+          subnets            : ["subnet-0a57763c40d757152","subnet-0801fdff20634df95"]
+          key                : edtech-payer/opm/ie-dev/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : ie-dev
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : develop
+          subarea            : ${{ parameters.subarea }} # ie 
+
+        
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" }} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-052886cd3a4a3e7a1
+          subnets            : ["subnet-0ecc1f337ea83079c","subnet-02eb326d5308933e9"]     
+          key                : edtech-payer/opm/ie-hmg/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : ie-hmg
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : homolog
+          subarea            : ${{ parameters.subarea }} # ie
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-0da2cd947dca3a599
+          subnets            : ["subnet-08bbc217a8cd11fe7","subnet-0b16ae9aa6ad23352"]     
+          key                : edtech-payer/opm/hub-dev/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : hub-dev
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : develop
+          subarea            : ${{ parameters.subarea }} # hub
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-084594573c4168e25
+          subnets            : ["subnet-001a02d72b2689241","subnet-0275632ca05cb970d"]   
+          key                : edtech-payer/opm/hub-hmg/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : hub-hmg      
+          availability_zones : us-east-1a, us-east-1b
+          area               : opm
+          ambiente           : homolog
+          subarea            : ${{ parameters.subarea }} # hub
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #hub-prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-08cbda0de8f4125c5
+          subnets            : ["subnet-04a36793fde17fd1f","subnet-0398b4060014b2b08", "subnet-0618b295b4145e3dc"]   
+          key                : edtech-payer/opm/hub-prod/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : hub-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # hub
+          
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-036ce5b424075c72b
+          subnets            : ["subnet-0eaf837f20697cac9","subnet-00d7292ad3dc92021", "subnet-0b5eecab0a434700c"]
+          key                : edtech-payer/opm/ie-pucrs/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : pucrs-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # puc-grad
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-02f084583839458de
+          subnets            : ["subnet-078c9c393d43d512a","subnet-078757a29f89439e7", "subnet-0dc6dd606f63fe5ab"]
+          key                : edtech-payer/opm/ie-faap/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : faap-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # faap
+
+    - id: template
+      if: ${{ parameters.account_id === "592353520627" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          vpc_id             : vpc-00927db38c9ba6864
+          subnets            : ["subnet-090ee5072ebf2bc46","subnet-06a83896f736b9ce6", "subnet-0996ea88d82cc39d3"]
+          key                : edtech-payer/opm/ie-uninassau/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : uninassau-prod
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : opm
+          ambiente           : production
+          subarea            : ${{ parameters.subarea }} # uninassau
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          key                : edtech-payer/opm/ie-santa-casa/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : santa-casa
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # "santa-casa"
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: ${{ parameters.repositorio }}
+        values:
+          resource_name      : ${{ parameters.resource_name }}
+          alb_internal       : ${{ parameters.alb_internal }}
+          load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+          account_id         : ${{ parameters.account_id }}
+          container_port     : ${{ parameters.container_port }}
+          health_check_path  : ${{ parameters.health_check_path }}
+          #
+          key                : edtech-payer/opm/ie-unesc/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+          tag                : unesc
+          availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+          area               : "opm"
+          ambiente           : "production"
+          subarea            : ${{ parameters.subarea }} # "unesc"
+
+    # - id: template
+    #   if: ${{ parameters.account_id === ""948424637866"" }} #PUC POS
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: ${{ parameters.repositorio }}
+    #     values:
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       alb_internal       : ${{ parameters.alb_internal }}
+    #       load_balancer_arn  : ${{ parameters.load_balancer_arn }}
+    #       account_id         : ${{ parameters.account_id }}
+    #       container_port     : ${{ parameters.container_port }}
+    #       health_check_path  : ${{ parameters.health_check_path }}
+    #
+    #       vpc_id             : vpc-0398eccfb4bf5d0ae
+    #       subnets            : ["subnet-02012f229f338cbb9","subnet-0c204d0215253ed28", "subnet-08f6efa90b4a190b7"]
+    #       key                : edtech-payer/opm/pucrs-pos-prod/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : pucrs-pos-prod
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : production
+    #       subarea            : ${{ parameters.subarea }} # pucrs-pos
+
+
+    # - id: template
+    #   if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: ${{ parameters.repositorio }}
+    #     values:
+    #       account_id         : ${{ parameters.account_id }}
+    #       alb_internal       : ${{ parameters.alb_internal }}
+    #       vpc_id             : vpc-018a34681e165085e
+    #       subnets            : ["subnet-0af984773eff8f5ca","subnet-0e2d86330be7b67b3"]
+    #       key                : edtech-payer/opm/pucrs-pos-hmg/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : pucrs-pos-hmg
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : us-east-1a, us-east-1b
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : homolog
+    #       subarea            : ${{ parameters.subarea }} # pucrs-pos
+
+    # - id: template
+    #   if: ${{ parameters.account_id === "192393990768" }} #FIA
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: ${{ parameters.repositorio }}
+    #     values:
+    #       account_id         : ${{ parameters.account_id }}
+    #       alb_internal       : ${{ parameters.alb_internal }}
+    #       vpc_id             : vpc-00f0fc985f6bd1322
+    #       subnets            : ["subnet-021f17532485a3fe9","subnet-0dd547465c3f1be8b", "subnet-05974476c1e89d684"]
+    #       key                : edtech-payer/opm/fia-pos-prod/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : fia-prod
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : "us-east-1a, us-east-1b, us-east-1c"
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : production
+    #       subarea            : ${{ parameters.subarea }} # fia
+
+    # - id: template
+    #   if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+    #   name: Render terraform files
+    #   action: fetch:template
+    #   input:
+    #     targetPath: ./
+    #     url: ${{ parameters.repositorio }}
+    #     values:
+    #       account_id         : ${{ parameters.account_id }}
+    #       alb_internal       : ${{ parameters.alb_internal }}
+    #       vpc_id             : vpc-01c25bcb6673a9628
+    #       subnets            : ["subnet-07b1b51ba7a0fd5fb","subnet-0ebfeedad1707d2d9"]
+    #       key                : edtech-payer/opm/fia-pos-hmg/backstage/load-balancer-all-resources/${{ parameters.resource_name }}/terraform.tfstate
+    #       tag                : fia-hmg
+    #       resource_name      : ${{ parameters.resource_name }}
+    #       # container_port     : ${{ parameters.container_port }}
+    #       availability_zones : us-east-1a, us-east-1b
+    #       # health_check_path  : ${{ parameters.health_check_path }}
+    #       area               : opm
+    #       ambiente           : homolog
+    #       subarea            : ${{ parameters.subarea }} # fia
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+  
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.resource_name }}'
+        title: '🔩 Create ${{ parameters.resource_name }} AWS Aplication Load Balancer'
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+
+          |        |		   |
+          | ------ | ----- |
+          | Aplication Load Balancer | ${{ parameters.resource_name }}
+          | Ambiente       | ${{ parameters.ambiente }}
+          | Squad          | ${{ parameters.grupo }}
+ 
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d load-balancer-all-resources/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d load-balancer-all-resources/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+          ```
+
+        sourcePath: ./
+        targetPath: load-balancer-all-resources/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+        #targetPath: tf-aws-${{ parameters.subarea }}/services/load-balancer/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github

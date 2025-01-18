@@ -1,0 +1,730 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Cluster
+  title: Criação de ECS Cluster
+  description: Realize a criação de um Cluster
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+
+    - title: Cluster
+      required: [ resource_name, vpc_id, region, cluster_type, minimum_scaling_step_size_cp, maximum_scaling_step_size_cp, asg_min_size, asg_max_size, asg_desired_capacity, image_id, instance_type ]
+      properties:
+        resource_name:
+          title: Cluster Name
+          type: string
+          description: Defina um nome para o Cluster
+          pattern: '^(back|front)-(.*)-(dev|hmg|prod|app|matrix|checkout|salavirtual|vitrine|networking|steve)$'
+          ui:help: 'O nome do Cluster deve começar com: "back-" ou "front-" e terminar com uma das opções a seguir: "dev", "hmg", "prod", "app", "matrix", "checkout", "salavirtual", "vitrine", "networking", "steve"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+        vpc_id:
+          title: VPC ID
+          type: string
+          description: Defina em qual VPC o recurso será provisionado
+          #pattern: '^rds-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+          #ui:help: 'O nome da RDS deve começar com: "rds-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+        region:
+          title: Region 
+          type: string
+          default: "us-east-1"
+          enum: [ "us-east-1" ]                                                   
+        cluster_type:
+          title: Cluster Type 
+          type: string
+          description: Defina o tipo de cluster
+          default: "EC2"
+          enum: [ "EC2", "FARGATE" ]               
+        minimum_scaling_step_size_cp:
+          title: Minimum Scaling Step Size CP 
+          type: string
+          default: "1"
+          enum: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",]
+        maximum_scaling_step_size_cp:
+          title: Maximum Scaling Step Size CP 
+          type: string
+          default: "1"
+          enum: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",]
+        asg_min_size:
+          title: ASG Minimum Size
+          type: string
+          description: Defina Minimum Size do ASG para o Cluster
+          default: "1"
+          enum: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",]             
+        asg_max_size:
+          title: ASG Maximum Size
+          type: string
+          description: Defina o Maximum Size do ASG para o Cluster
+          default: "1"
+          enum: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",]              
+        asg_desired_capacity:
+          title: ASG Desired Capacity
+          type: string
+          description: Defina o Desired Size do ASG para o Cluster
+          default: "1"
+          enum: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",]     
+        image_id:
+          title: Cluster Tye 
+          type: string
+          description: Defina o tipo de cluster
+          default: "ami-0cce120e74c5100d4"
+          enum: [ "ami-0cce120e74c5100d4" ]             
+        instance_type:
+          title: Instance Type
+          type: string
+          description: Defina o Tipo da instância
+          default: "t3a.small"
+          ui:
+            autofocus: true
+            options:
+              rows: 5            
+
+    # - title: Choose a location
+    #   required:
+    #     - repoUrl
+    #   properties:
+    #     repoUrl:
+    #       title: Repository Location
+    #       type: string
+    #       ui:field: RepoUrlPicker
+    #       ui:options:
+    #         allowedHosts:
+    #           - github.com
+    #         allowedOwners:
+    #           - uoledtech-infra-as-code
+    #         allowedRepos:
+    #           - repositorio-versionamento
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+
+    # - title: Choose a location
+    #   required:
+    #     - repoUrl
+    #   properties:
+    #     repoUrl:
+    #       title: Repository Location
+    #       type: string
+    #       ui:field: RepoUrlPicker
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #           additionalScopes:
+    #             github:
+    #               - workflow
+    #         allowedHosts:
+    #           - github.com
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: Repository Location
+    #       type: string
+    #       readOnly: true
+    #       ui:backstage:
+    #         review:
+    #           show: false
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #           additionalScopes:
+    #             github:
+    #               - workflow
+    #         allowedHosts:
+    #           - github.com
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps: 
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-0e5b78700e8226fa9"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "develop"
+          subarea            : ${{ parameters.subarea }} # "ie"
+          #
+          key           : "edtech-payer/opm/ie-dev/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "ie-dev"
+
+        
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" === "front"}} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-052886cd3a4a3e7a1"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "ie"
+          #   
+          key           : "edtech-payer/opm/ie-hmg/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "ie-hmg"
+
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-0da2cd947dca3a599"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "develop"
+          subarea            : ${{ parameters.subarea }} # "hub"
+          # 
+          key           : "edtech-payer/opm/hub-dev/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "hub-dev"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-084594573c4168e25"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "hub"
+          # 
+          key           : "edtech-payer/opm/hub-hmg/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "hub-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #hub-prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-08cbda0de8f4125c5"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "hub"
+          #
+          key           : "edtech-payer/opm/hub-prod/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "hub-prod"
+
+
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-036ce5b424075c72b"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "puc-grad"
+          # 
+          key                        : "edtech-payer/opm/ie-pucrs/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag                        : "pucrs-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-02f084583839458de"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "faap"
+          #
+          key           : "edtech-payer/opm/ie-faap/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "faap-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-00927db38c9ba6864"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "uninassau"
+          #
+          key           : "edtech-payer/opm/ie-uninassau/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "uninassau-prod"
+    
+    - id: template
+      if: ${{ parameters.account_id === "948424637866" }} #PUC POS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-0398eccfb4bf5d0ae"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "pucrs-pos"
+          #
+          key           : "edtech-payer/opm/pucrs-pos-prod/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "pucrs-pos-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-018a34681e165085e"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "pucrs-pos"
+          #
+          key           : "edtech-payer/opm/pucrs-pos-hmg/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "pucrs-pos-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "192393990768" }} #FIA
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-00f0fc985f6bd1322"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "fia"
+          #
+          key           : "edtech-payer/opm/fia-pos-prod/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "fia-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          #vpc_id                       : "vpc-01c25bcb6673a9628"
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "fia"
+          #
+          key           : "edtech-payer/opm/fia-pos-hmg/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "fia-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "santa-casa"
+          #
+          key           : "edtech-payer/opm/ie-santa-casa/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "santa-casa"
+  
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea            : ${{ parameters.subarea }} # "unesc"
+          #
+          key           : "edtech-payer/opm/ie-unesc/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "unesc-pos-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "386886142089" }} #Unesc hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/
+        values:
+          resource_name                : ${{ parameters.resource_name }}
+          vpc_id                       : ${{ parameters.vpc_id }}
+          account_id                   : ${{ parameters.account_id }}
+          region                       : ${{ parameters.region }}
+          cluster_type                 : ${{ parameters.cluster_type }}
+          minimum_scaling_step_size_cp : ${{ parameters.minimum_scaling_step_size_cp }}
+          maximum_scaling_step_size_cp : ${{ parameters.maximum_scaling_step_size_cp }}
+          asg_min_size                 : ${{ parameters.asg_min_size }}
+          asg_max_size                 : ${{ parameters.asg_max_size }}
+          asg_desired_capacity         : ${{ parameters.asg_desired_capacity }}
+          image_id                     : ${{ parameters.image_id }}
+          instance_type                : ${{ parameters.instance_type }}
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea            : ${{ parameters.subarea }} # "unesc"
+          #
+          key           : "edtech-payer/opm/ie-unesc/backstage/ecs-cluster/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "unesc-pos-hmg"
+
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+
+    # - id: copy_lambda_function_zip
+    #   name: Copy zip files
+    #   action: fetch:plain
+    #   input:
+    #     url: https://github.com/uoledtech-infra-as-code/tf-aws-ecs-cluster/blob/main/module/skeleton/zip/
+    #     targetPath: ./
+
+    # - id: publish-user
+    #   name: Publish-User
+    #   action: publish:github
+    #   input:
+    #     repoUrl: github.com?owner=uoledtech-infra-as-code&repo=teste-backstage-pr
+    #     branchName: 'feat/${{ parameters.resource_name }}'
+    #     description: This is ${{ parameters.component_id }}
+    #     gitAuthorName: ${{ user.entity.metadata.name }}
+    #     gitAuthorEmail: ${{ user.entity.spec.profile.email }}
+    
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.resource_name }}'
+        title: '🔩 Create ${{ parameters.resource_name }} AWS ECS Cluster'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+          
+          |        |		   |
+          | ------ | ----- |
+          | teste | ${{ user.ref }}
+          | teste | ${{ values.subarea }}
+          | teste | ${{ user.entity.spec.profile.email }}
+          | Cluster | ${{ parameters.resource_name }} 
+          | Squad   | ${{ parameters.grupo }}
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d tf-aws-${{ parameters.subarea }}/services/ecs-cluster/tf-${{ parameters.resource_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d tf-aws-${{ parameters.subarea }}/services/ecs-cluster/tf-${{ parameters.resource_name }}
+          ```
+
+        #description: '${{ parameters.grupo }} | user: ${{ secrets.USER_OAUTH_TOKEN }}'
+        #commitMessage: 'atlantis plan -d lambda/lambda-vpc-and-sqs/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}'
+        sourcePath: ./
+        targetPath: tf-aws-${{ parameters.subarea }}/services/ecs-cluster/tf-${{ parameters.resource_name }}
+        #targetPath: ecs-cluster/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github
+      - title: 'To view more check documentation'
+        icon: docs
+        url: ${{ steps.template.tag }}

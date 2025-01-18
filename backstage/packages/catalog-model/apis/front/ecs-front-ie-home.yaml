@@ -1,0 +1,25 @@
+    apiVersion: backstage.io/v1alpha1
+    kind: API
+    metadata:
+      name: ECS-front-ie-home
+      description: Tribo Core
+      tags:
+        - nestjs
+        - javascript
+        - node
+      links:
+        - url: https://github.com/uoledtech-opm/campus-digital-ie-front/tree/main
+          title: GitHub Main
+          icon: github
+        - url: https://github.com/uoledtech-opm/campus-digital-ie-front/tree/homolog
+          title: GitHub Homolog
+          icon: github
+        - url: https://github.com/uoledtech-opm/campus-digital-ie-front/tree/develop
+          title: GitHub Develop
+          icon: github
+    spec:
+      type: service
+      lifecycle: production
+      owner: tribo-core
+      definition:
+        $text: ./ecs-front-ie-home.yaml

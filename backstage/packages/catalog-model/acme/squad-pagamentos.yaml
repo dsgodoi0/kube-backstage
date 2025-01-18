@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: squad-pagamentos
+  description: Growth - Squad Pagamentos
+spec:
+  type: team
+  profile:
+    # Intentional no displayName for testing
+    email: squad-pagamentos@example.com
+    picture: https://avatars.dicebear.com/api/identicon/team-a@example.com.svg?background=%23fff&margin=25
+  parent: tribo-growth
+  children: []

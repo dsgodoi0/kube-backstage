@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ECS-back-vendas-contratos
+  description: Squad Pagamentos
+  tags:
+    - nestjs
+    - javascript
+    - node-14
+  links:
+    - url: https://back-hub-contratos-dev.edtech.com.br/
+      title: URI Develop
+      icon: code
+    - url: https://back-contratos-hmg.edtech.com.br
+      title: URI Homolog
+      icon: code
+    - url: https://back-hub-contratos-dev.edtech.com.br/api/docs
+      title: Swagger Develop
+      icon: code
+    - url: https://github.com/uoledtech-opm/contratos-hub-vendas-backend/tree/main
+      title: GitHub Main
+      icon: github
+    - url: https://github.com/uoledtech-opm/contratos-hub-vendas-backend/tree/homolog
+      title: GitHub Homolog
+      icon: github
+    - url: https://github.com/uoledtech-opm/contratos-hub-vendas-backend/tree/develop
+      title: GitHub Develop
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: squad-pagamentos
+  definition:
+    $text: ./ecs-back-vendas-contratos.yaml

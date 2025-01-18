@@ -1,0 +1,31 @@
+    apiVersion: backstage.io/v1alpha1
+    kind: API
+    metadata:
+      name: ECS-opm-salavirtual-home
+      description: All Squads
+      tags:
+        - nestjs
+        - javascript
+        - node
+      links:
+        - url: https://campusdigital-ie-dev.edtech.com.br/
+          title: URI Develop
+          icon: code
+        - url: https://front-opm-home-hmg.edtech.com.br/
+          title: URI Homolog
+          icon: code
+        - url: https://github.com/uoledtech-opm/campus-digital-ie-front/tree/main
+          title: GitHub Main
+          icon: github
+        - url: https://github.com/uoledtech-opm/campus-digital-ie-front/tree/homolog
+          title: GitHub Homolog
+          icon: github
+        - url: https://github.com/uoledtech-opm/campus-digital-ie-front/tree/develop
+          title: GitHub Develop
+          icon: github
+    spec:
+      type: service
+      lifecycle: production
+      owner: [squad-academico, squad-aquisicao, squad-avaliacao, squad-conteudo, squad-engajamento, squad-pagamentos]
+      definition:
+        $text: ./ecs-opm-salavirtual-home.yaml

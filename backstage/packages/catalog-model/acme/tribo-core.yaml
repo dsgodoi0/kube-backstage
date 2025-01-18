@@ -1,0 +1,158 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: tribo-core
+  description: Tribo Core
+spec:
+  type: team
+  profile:
+    # Intentional no displayName for testing
+    email: tribo-growth@example.com
+    picture: https://avatars.dicebear.com/api/identicon/team-a@example.com.svg?background=%23fff&margin=25
+  children: [squad-matrix, squad-engajamento, squad-conteudo,squad-avaliacao, squad-academico]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Victor-Orlandini-Cintra
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: dagodoi@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Victor Orlandini Cintra
+#     email: vcintra@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Rafael-Bueno-De-Lara
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: rblara@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Rafael Bueno De Lara
+#     email: rblara@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Rodrigo-Victor-Varanda
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: rvaranda@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Rodrigo Victor Varanda
+#     email: rvaranda@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Gustavo-Mesquita-Da-Silveira
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: gmsilveira@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Gustavo Mesquita Da Silveira
+#     email: gmsilveira@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Felipe-Henrique-Ferraresi
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: fferraresi@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Felipe Henrique Ferraresi
+#     email: fferraresi@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Danilo-Narnatonis-De-Moraes-Oliveira
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: dnarnatonis@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Danilo Narnatonis De Moraes Oliveira
+#     email: dnarnatonis@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Lucas-Pinto-Queiroz-Da-Rosa
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: lqrosa@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Lucas Pinto Queiroz Da Rosa
+#     email: lqrosa@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Jaelson-Apolinario-de-Oliveira
+#   description: Tribo Core
+#   annotations:
+#     uoledtech.org/email: japolinario@uoledtech.com
+#   tags:
+#     - tribo-core
+# spec:
+#   profile:
+#     displayName: Jaelson Apolinario de Oliveira
+#     email: japolinario@uoledtech.com
+#     picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#   memberOf: [tribo-core]
+# ---
+# ---
+#  apiVersion: backstage.io/v1alpha1
+#  kind: User
+#  metadata:
+#    name: Miguel-Braga-Garcia
+#    description: Tribo Core
+#    annotations:
+#      uoledtech.org/email: mgarcia2@uoledtech.com
+#    tags:
+#      - tribo-core
+#  spec:
+#    profile:
+#      displayName: Miguel Braga Garcia
+#      email: mgarcia2@uoledtech.com
+#      picture: https://avatars.dicebear.com/api/avataaars/calum-leavy@example.com.svg?background=%23fff
+#    memberOf: [tribo-core]
+

@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: sqs-adyen-checkout-notify-tkt-hub-prod
+  description: Armazena mensagens sobre notificação de compra
+  links:
+    - url: https://onenr.io/08jqz0vGGQl
+      title: New Relic
+spec:
+  type: queue
+  owner: squad-pagamentos
+  definition:
+    $text: ./resource-queue.yaml

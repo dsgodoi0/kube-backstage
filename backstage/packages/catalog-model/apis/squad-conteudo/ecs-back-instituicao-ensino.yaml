@@ -1,0 +1,31 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ECS-back-instituicao-ensino
+  description: Squad Conteúdo
+  tags:
+    - nestjs
+    - javascript
+    - node-16-alpine3-14
+  links:
+    - url: https://back-hub-inst-ensino-dev.edtech.com.br
+      title: URI Develop
+      icon: code
+    - url: https://back-hub-inst-ensino-dev.edtech.com.br/api
+      title: Swagger Develop
+      icon: code
+    - url: https://github.com/uoledtech-opm/instituicao-ensino-hub-corp-backend/tree/main
+      title: GitHub Main
+      icon: github
+    - url: https://github.com/uoledtech-opm/instituicao-ensino-hub-corp-backend/tree/homolog
+      title: GitHub Homolog
+      icon: github
+    - url: https://github.com/uoledtech-opm/instituicao-ensino-hub-corp-backend/tree/develop
+      title: GitHub Develop
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: squad-conteudo
+  definition:
+    $text: ./ecs-back-instituicao-ensino.yaml

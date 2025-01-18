@@ -1,0 +1,79 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: example-apis
+  description: A collection of all Backstage example APIs
+spec:
+  targets:
+  # Squad-Acadêmico:
+    - ./apis/squad-academico/ecs-back-adm-ead-matricula.yaml
+    - ./apis/squad-academico/ecs-back-autenticacao.yaml
+    - ./apis/squad-academico/ecs-back-autorizacao.yaml
+    - ./apis/squad-academico/ecs-back-dash-alunos.yaml
+    - ./apis/squad-academico/ecs-back-ie-callback.yaml
+    - ./apis/squad-academico/ecs-back-ie-cognito.yaml
+    - ./apis/squad-academico/ecs-back-opm-aluno.yaml
+    - ./apis/squad-academico/ecs-back-opm-matricula.yaml
+    - ./apis/squad-academico/ecs-back-opm-supervisores.yaml
+  # Squad-Avaliação:
+    - ./apis/squad-avaliacao/ecs-back-notas.yaml
+    - ./apis/squad-avaliacao/ecs-back-opm-avaliacao.yaml
+  # Squad-Aquisição:
+    - ./apis/squad-aquisicao/ecs-back-adm-ead-processo-seletivo.yaml
+    - ./apis/squad-aquisicao/ecs-back-vendas-hubspot.yaml
+  # Squad-Conteúdo:
+    - ./apis/squad-conteudo/ecs-back-adm-ead-conteudo.yaml
+    - ./apis/squad-conteudo/ecs-back-adm-ead-cursos.yaml
+    - ./apis/squad-conteudo/ecs-back-adm-ead-object-integration.yaml
+    - ./apis/squad-conteudo/ecs-back-dash-cursos.yaml
+    - ./apis/squad-conteudo/ecs-back-dash-disciplinas.yaml
+    - ./apis/squad-conteudo/ecs-back-ie-bff.yaml
+    - ./apis/squad-conteudo/ecs-back-ie-ead-bff.yaml
+    - ./apis/squad-conteudo/ecs-back-instituicao-ensino.yaml
+    - ./apis/squad-conteudo/ecs-back-opm-conteudo.yaml
+    - ./apis/squad-conteudo/ecs-back-opm-curso.yaml
+    - ./apis/squad-conteudo/ecs-back-opm-progresso.yaml
+    - ./apis/squad-conteudo/ecs-back-sala-aula-player.yaml
+  # Squad Engajamento
+    - ./apis/squad-engajamento/ecs-back-ie-interacao-alunos.yaml
+  # Squad Pagamentos
+    - ./apis/squad-pagamentos/ecs-back-dash-financeiro.yaml
+    - ./apis/squad-pagamentos/ecs-back-dash-vendas.yaml
+    - ./apis/squad-pagamentos/ecs-back-financeiro-recorrencia.yaml
+    - ./apis/squad-pagamentos/ecs-back-opm-mailgun.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-bff.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-categorias.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-clientes.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-contratos.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-gateway-pagamento.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-integracao-adyen.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-pagamento.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-pedido.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-promocao.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-webhook.yaml
+    - ./apis/squad-pagamentos/ecs-back-vendas-worker.yaml
+    - ./apis/squad-pagamentos/ecs-front-vendas-home.yaml
+  # All Squads
+    - ./apis/create-parameters.yaml
+    - ./apis/ecs-back-opm-comunicacao.yaml
+    - ./apis/ecs-back-vendas-integracao-pagamento.yaml
+    - ./apis/ecs-front-ie-professores.yaml
+    - ./apis/ecs-opm-salavirtual-home.yaml
+  # Front
+    - ./apis/front/ecs-front-hub-backoffice.yaml
+    - ./apis/front/ecs-front-hub-certificacoes.yaml
+    - ./apis/front/ecs-front-ie-home.yaml
+    - ./apis/front/ecs-front-ie-home.yaml
+    - ./apis/front/ecs-front-ie-professores.yaml
+    - ./apis/front/ecs-front-instituicao-ensino.yaml
+    - ./apis/front/ecs-front-vendas-home.yaml
+
+  # Default Backstage:
+    #- ./apis/hello-world-trpc-api.yaml
+    #- ./apis/petstore-api.yaml
+    #- ./apis/petstore-webhook-api.yaml
+    #- ./apis/spotify-api.yaml
+    #- ./apis/streetlights-api.yaml
+    #- ./apis/swapi-graphql.yaml
+    #- ./apis/wayback-archive-api.yaml
+    #- ./apis/wayback-search-api.yaml

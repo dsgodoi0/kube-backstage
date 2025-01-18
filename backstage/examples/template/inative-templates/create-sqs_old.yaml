@@ -1,0 +1,318 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-SQS-Only
+  title: Criação de SQS
+  description: Realize a criação de fila SQS
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - Ambiente
+      properties:
+        Ambiente:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione um dos ambientes para realizar a criação do paramter desejado
+          enum:
+            - ie-dev
+            - ie-hmg
+            - hub-dev
+            - hub-hmg
+            - pucrs-grad
+            - faap
+            - uninassau
+            - pucrs-pos
+            - pucrs-hmg
+            - fia
+            - fia-hmg
+          enumNames:
+            - 'Instituição de Ensino - Desenvolvimento'
+            - 'Instituição de Ensino - Homologação'
+            - 'Hub - Desenvolvimento'
+            - 'Hub - Homologação'
+            - 'Instituição de Ensino - PUCRS'
+            - 'Instituição de Ensino - FAAP'
+            - 'Instituição de Ensino - UNINASSAU'
+            - 'PUCRS - PÓS'
+            - 'PUCRS PÓS - Homologação'
+            - 'FIA'
+            - 'FIA - Homologação'
+            
+    - title: SQS Queue
+      required:
+        #- Key
+        - ResourceName
+        #- DLQ
+        #- FifoQueue
+        #- Account-Id
+        #- ContentBasedDeduplication
+        #- DelaySeconds
+        #- MaxMessageSize
+        #- MessageRetentionSeconds
+        #- ReceiveWaitTimeSeconds
+        #- Area
+        #- Ambiente
+        #- Subarea
+        #- Pull-Request-Name
+        #- Head-Ref
+      properties:
+        ResourceName:
+          title: Resource Name
+          type: string
+          description: Resource Name
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        DLQ:
+          title: SQS com DLQ (dead-letter queues)
+          description: Marque para adicionar DLQ ao SQS
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+        FifoQueue:
+          title: FIFO Queue (First-In-First-Out)
+          description: Marque em caso de FIFO
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+        ContentBasedDeduplication:
+          title: Content Based Deduplication
+          description: Content Based Duplication
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+        #Key:
+        #  title: Key
+        #  type: string
+        #  description: path tfstate
+        #  ui:
+        #    autofocus: true
+        #    options:
+        #      rows: 5
+        #Account-Id:
+        #  title: Account ID
+        #  type: string
+        #  description: AWS Account ID
+        #  ui:
+        #    autofocus: true
+        #   options:
+        #      rows: 5
+        ##DelaySeconds:
+        ##  title: Delay Seconds
+        ##  type: string
+        ##  description: delay seconds (inserir somente números)
+        ##  maxLength: 20
+        ##  pattern: '^[0-9]+$'
+        ##  ui:
+        ##    autofocus: true
+        ##    options:
+        ##      rows: 5
+        ##MaxMessageSize:
+        ##  title: Max Message Size
+        ##  type: string
+        ##  description: tamanho máximo da mensagem (inserir somente números)
+        ##  pattern: '^[0-9]+$'
+        ##  ui:
+        ##    autofocus: true
+        ##    options:
+        ##      rows: 5
+        ##MessageRetentionSeconds:
+        ##  title: Message Retention Seconds
+        ##  type: string
+        ##  description: tempo retenção da mensagem em segundos (inserir somente números)
+        ##  maxLength: 20
+        ##  pattern: '^[0-9]+$'
+        ##  ui:
+        ##    autofocus: true
+        ##    options:
+        ##      rows: 5
+        ##ReceiveWaitTimeSeconds:
+        ##  title: Receive Wait Time Seconds
+        ##  type: string
+        ##  description: tempo de espera para o recebimento em segundos (inserir somente números)
+        ##  maxLength: 20
+        ##  pattern: '^[0-9]+$'
+        ##  ui:
+        ##    autofocus: true
+        ##    options:
+        ##      rows: 5
+        #Area:
+        #  title: Selecione o Ambiente
+        #  type: string
+        #  description: selecione um dos ambientes para realizar a criação do paramter desejado
+        #  enum: [opm, edcorp, customer, conteudo, institucional]
+        #Ambiente:
+        #  title: Selecione o Ambiente
+        #  type: string
+        #  description: selecione um dos ambientes para realizar a criação do paramter desejado
+        #  enum: [develop, homolog, production]
+        #Subarea:
+        #  title: Selecione o Ambiente
+        #  type: string
+        #  description: selecione um dos ambientes para realizar a criação do paramter desejado
+        #  enum: [ie, hub, puc-grad, faap, uninassau, unesc, pucrs-pos, fia]
+        #Pull-Request-Name:
+        #  title: Pull Request Name
+        #  type: string
+        #  description: nome do Pull-Request-Name
+        #  ui:
+        #    autofocus: true
+        #    options:
+        #      rows: 5
+        #Head-Ref:
+        #  title: Head-Ref
+        #  type: string
+        #  description: Head-Ref
+        #  ui:
+        #    autofocus: true
+        #    options:
+        #      rows: 5
+
+    - title: Publisher
+      required:
+        - PublisherAccount
+        - PublisherMicroService
+      properties:
+        PublisherAccount:
+          title: Selecione a Conta Publisher
+          type: string
+          description: selecione o ambiente publisher 
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+        PublisherMicroService:
+          title: Micro Service Publisher
+          type: string
+          description: descreva o nome do micro service publisher
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+   
+    - title: Consumer
+      required:
+        - ConsumerAccount
+        - ConsumerMicroService
+      properties:
+        ConsumerAccount:
+          title: Selecione a Conta Consumer
+          type: string
+          description: selecione o ambiente consumer 
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+        ConsumerMicroService:
+          title: Micro Service Consumer
+          type: string
+          description: descreva o nome do micro service consumer
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+  
+  steps:  
+    - id: backstage_request_post
+      name: backstage request
+      action: http:backstage:request
+      input:
+        method: 'POST'
+        path: '/proxy/post_edtech_hub_sqs/backstage/sqs'
+        headers:
+          content-type: 'application/json'
+        body:
+          Ambiente: '${{ parameters.Ambiente }}'
+          #Key: '${{ parameters.Key }}'
+          ResourceName: '${{ parameters.ResourceName }}'
+          DLQ: '${{ parameters.DLQ }}'
+          FifoQueue: '${{ parameters.FifoQueue }}'
+          #AccountId: '${{ parameters.AccountId }}'
+          ContentBasedDeduplication: '${{ parameters.ContentBasedDeduplication }}'
+          #DelaySeconds: '${{ parameters.DelaySeconds }}'
+          #MaxMessageSize: '${{ parameters.MaxMessageSize }}'
+          #MessageRetentionSeconds: '${{ parameters.MessageRetentionSeconds }}'
+          #ReceiveWaitTimeSeconds: '${{ parameters.ReceiveWaitTimeSeconds }}'
+          ConsumerMicroService: '${{ parameters.ConsumerMicroService }}'
+          ConsumerAccount: '${{ parameters.ConsumerAccount }}'
+          PublisherMicroService: '${{ parameters.PublisherMicroService }}'
+          PublisherAccount: '${{ parameters.PublisherAccount }}'
+          #Area: '${{ parameters.Area }}'
+          #Ambiente: '${{ parameters.Ambiente }}'
+          #Subarea: '${{ parameters.Subarea }}'
+          #PullRequestName: '${{ parameters.Pull-Request-Name }}'
+          #HeadRef: '${{ parameters.Head-Ref }}'
+         
+          
+    - id: log-message
+      name: Log Message
+      action: debug:log
+      input:
+        Result: ${{ steps.backstage_request_post.output.body }}
+
+
+  output:
+    getResponse: '{{ steps.backstage_request.output.body }}'
+    getCode: '{{ steps.backstage_request.output.code }}'
+    getHeaders: '{{ steps.backstage_request.output.headers }}'

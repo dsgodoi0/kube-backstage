@@ -1,0 +1,37 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-repository
+  title: Criar Repositório
+  description: Cria um novo repositório no GitHub a partir de um template
+  tags:
+    - github
+    - repository
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Informações do Repositório
+      properties:
+        name:
+          title: Nome do Repositório
+          type: string
+          description: Nome do repositório a ser criado
+        description:
+          title: Descrição
+          type: string
+          description: Descrição do repositório
+
+  steps:
+    - id: create-repository
+      name: Create Repository
+      action: http:backstage:request
+      input:
+        method: 'POST'
+        path: '/proxy/post_edtech_hub_github/repository'
+        headers:
+          content-type: 'application/json'
+          Authorization: 'AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE'
+        body:
+          name: '${{ parameters.name }}'
+          description: '${{ parameters.description }}'

@@ -1,0 +1,801 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Lambda-Eventen-Bridge
+  title: Criação de Lambda + Event Bridge
+  description: Realize a criação de Lambda + SQS
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+            
+    - title: Lambda
+      required:
+        - lambda_name
+        - lambda_description
+        - lambda_runtime
+      properties:
+        lambda_name:
+          title: Lambda Name
+          type: string
+          description: Defina um nome para o Lambda
+          pattern: '^lambda-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+          ui:help: 'O nome do lambda deve começar com: "lambda-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        lambda_description:
+          title: Descrição 
+          type: string
+          description: Descrição do Lambda
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        lambda_runtime:
+          title: Runtime
+          type: string
+          description: Seleciona a runtime que deseja utilizar
+          enum:
+            - nodejs20.x
+            - nodejs18.x
+            - nodejs16.x
+            - python3.12
+            - python3.11
+    - title: Event Bridge
+      required:
+        - eventbridge_name
+        - cronTime
+      properties:
+        eventbridge_name:
+          title: Event Bridge Name
+          type: string
+          description: Defina um nome para o Event Bridge
+          pattern: '^event-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+          ui:help: 'O nome do Event Bridge deve começar com: "event-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        cronTime:
+          title: Cron Time
+          type: string
+          description: Defina a Cron Time para o Event Bridge exemplo :"cron(59 02 01 JAN ? 2024)"
+          pattern: '^cron\(.*\)$'
+          ui:
+            autofocus: true
+            help: 'Link da documentação: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cron-expressions.html'
+            options:
+              rows: 5
+    - title: Request Environment
+      properties:
+        method:
+          title: Method
+          type: string
+          description: Selecione  o método
+          enum:
+            - GET
+            - POST
+        endpoint:
+          title: Endipoint URL
+          type: string
+          description: Descreva o Endipoint
+          pattern: '^https://(.*)$'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        ie_id:
+          title: ID Instituição de Ensino
+          type: string
+          description: Selecione o ID da Instituição de Ensino
+          enum: ["1", "2", "3", "4", "['1', '2', '3', '4']", "-"]
+          enumNames: ["1 (FAAP)", "2 (UNINASSAU)", "3 (PUCRS)", "4 (SANTA CASA)", "Todos", "Nenhum"]
+        user_id:
+          title: User ID
+          type: string
+          description: Descreva o User ID
+          default: "999999"
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        msg_sucesso:
+          title: Mensagem de Falha
+          type: string
+          description: Descreva a mensagem de sucesso da requisição
+          default: "-"          
+          maxLength: 100
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        status_expected:
+          title: Status Code Expected
+          type: string
+          description: Informe status code esperado 
+          default: "200"          
+          maxLength: 100
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        msg_falha:
+          title: Mensagem de Falha
+          type: string
+          description: Descreva a mensagem de falha da requisição
+          default: "-"
+          maxLength: 100
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        notification_enabled:
+          title: Notificação de Falha
+          description: Marque em caso queira notificar em caso de falha
+          default: false
+          type: boolean
+          ui:
+            widget: radio
+        webhook:
+          title: Webhook Notification URL
+          type: string
+          description: Descreva a URL do Webhook para notificação
+          default: "-"
+          ui:
+            autofocus: true
+            options:
+              rows: 5          
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "../lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-0e5b78700e8226fa9"
+          subnets                    : ["subnet-0a57763c40d757152","subnet-0801fdff20634df95"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}" 
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"     
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"     
+          key                        : "edtech-payer/opm/ie-dev/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}" 
+      env:    
+          TAG: "ie-dev"
+        
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" }} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "../lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-052886cd3a4a3e7a1"
+          subnets                    : ["subnet-0ecc1f337ea83079c","subnet-02eb326d5308933e9"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"     
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"     
+          key                        : "edtech-payer/opm/ie-hmg/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "ie-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "../lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-0da2cd947dca3a599"
+          subnets                    : ["subnet-08bbc217a8cd11fe7","subnet-0b16ae9aa6ad23352"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"     
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"     
+          key                        : "edtech-payer/opm/hub-dev/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "hub-dev"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "../lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-084594573c4168e25"
+          subnets                    : ["subnet-001a02d72b2689241","subnet-0275632ca05cb970d"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"     
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"     
+          key                        : "edtech-payer/opm/hub-hmg/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "hub-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-036ce5b424075c72b"
+          subnets                    : ["subnet-0eaf837f20697cac9","subnet-00d7292ad3dc92021", "subnet-0b5eecab0a434700c"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/ie-pucrs/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "pucrs-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-02f084583839458de"
+          subnets                    : ["subnet-078c9c393d43d512a","subnet-078757a29f89439e7", "subnet-0dc6dd606f63fe5ab"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/ie-faap/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "faap-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "592353520627" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-00927db38c9ba6864"
+          subnets                    : ["subnet-090ee5072ebf2bc46","subnet-06a83896f736b9ce6", "subnet-0996ea88d82cc39d3"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/ie-uninassau/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "uninassau-prod"
+    
+    - id: template
+      if: ${{ parameters.account_id === "948424637866" }} #PUC POS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-0398eccfb4bf5d0ae"
+          subnets                    : ["subnet-02012f229f338cbb9","subnet-0c204d0215253ed28", "subnet-08f6efa90b4a190b7"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/pucrs-pos-prod/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "pucrs-pos-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-018a34681e165085e"
+          subnets                    : ["subnet-0af984773eff8f5ca","subnet-0e2d86330be7b67b3"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/pucrs-pos-hmg/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "pucrs-pos-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "192393990768" }} #FIA
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-00f0fc985f6bd1322"
+          subnets                    : ["subnet-021f17532485a3fe9","subnet-0dd547465c3f1be8b", "subnet-05974476c1e89d684"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/fia-pos-prod/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "fia-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-01c25bcb6673a9628"
+          subnets                    : ["subnet-07b1b51ba7a0fd5fb","subnet-0ebfeedad1707d2d9"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/fia-pos-hmg/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "fia-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-0acd217cf8103c7f2"
+          subnets                    : ["subnet-032b4d610efa5a822","subnet-05eebb22ef07da026", "subnet-0e00dfcdf0ed2ab4c"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/ie-santa-casa/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "santa-casa"
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : ""
+          subnets                    : ["","", ""]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/ie-unesc/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "unesc"
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #Hub Prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/blob/main/module/skeleton/
+        values:
+          role_name                  : "${{ parameters.lambda_name }}"
+          policy_name                : "${{ parameters.lambda_name }}"
+          lambda_name                : "${{ parameters.lambda_name }}"
+          lambda_description         : "${{ parameters.lambda_description }}"
+          account_id                 : "${{ parameters.account_id }}"
+          lambda_filename            : "lambda_function.zip"
+          lambda_handler             : "lambda_function.lambda_handler"
+          lambda_runtime             : "${{ parameters.lambda_runtime }}"
+          lambda_timeout             : "60"
+          eventbridge_name           : "${{ parameters.eventbridge_name }}"
+          eventbridge_target_id      : "${{ parameters.eventbridge_name }}"
+          eventbridge_scheduler_rule : "${{ parameters.eventbridge_name }}"
+          vpc_id                     : "vpc-08cbda0de8f4125c5"
+          subnets                    : ["subnet-04a36793fde17fd1f", "subnet-0398b4060014b2b08", "subnet-0618b295b4145e3dc"]
+          sg_name                    : "${{ parameters.lambda_name }}"
+          cronTime                   : "${{ parameters.cronTime }}"
+          endpoint                   : "${{ parameters.endpoint }}" 
+          webhook                    : "${{ parameters.webhook }}"
+          ie_id                      : "${{ parameters.ie_id }}"
+          user_id                    : "${{ parameters.user_id }}"
+          method                     : "${{ parameters.method }}"
+          msg_sucesso                : "${{ parameters.msg_sucesso }}"
+          msg_falha                  : "${{ parameters.msg_falha }}"
+          key                        : "edtech-payer/opm/hub-prod/backstage/lambda_event_bridge/${{ parameters.lambda_name }}/terraform.tfstate"
+          notification_enabled       : "${{ parameters.notification_enabled }}"
+          status_expected            : "${{ parameters.status_expected }}"
+          tag                        : "hub-prod"
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+
+    - id: copy_lambda_function_zip
+      name: Copy zip files
+      action: fetch:plain
+      input:
+        url: https://github.com/uoledtech-infra-as-code/tf-lambda-cronjob/tree/main/module/skeleton/zip/
+        targetPath: ./
+    
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.lambda_name }}'
+        title: '🔩 Create ${{ parameters.lambda_name }} AWS Lambda + Event Bridge'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+
+          |        |		   |
+          | ------ | ----- |
+          | Lambda       | ${{ parameters.lambda_name }} 
+          | Runtime      | ${{ parameters.lambda_runtime }} 
+          | Event Bridge | ${{ parameters.eventbridge_name }}
+          | Cron Time	   | ${{ parameters.cronTime }}	
+          | Ambiente     | ${{ parameters.ambiente }}	
+          | Squad        | ${{ parameters.grupo }}
+
+          | Enviroments ||
+          | ------ | ----- |
+          | Method | ${{ parameters.method }} |
+          | Endipoint URL | ${{ parameters.endpoint }} |
+          | ID Instituição de Ensino | ${{ parameters.ie_id }} |
+          | User ID | ${{ parameters.user_id }} |
+          | Mensagem de Falha | ${{ parameters.msg_falha }} |
+          | Status Code Expected | ${{ parameters.status_expected }} |
+          | Notificação de Falha | ${{ parameters.notification_enabled }} |
+          | Webhook Notification URL | ${{ parameters.webhook }} |
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d tf-aws-${{ parameters.subarea }}/globals/lambda/tf-${{ parameters.lambda_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d tf-aws-${{ parameters.subarea }}/globals/lambda/tf-${{ parameters.lambda_name }}
+          ```
+
+        sourcePath: ./
+        #targetPath: lambda/lambda-cronjob/${{ parameters.ambiente }}/${{ steps.env.TAG }}/tf-${{ parameters.lambda_name }}
+        targetPath: tf-aws-${{ parameters.subarea }}/globals/lambda/tf-${{ parameters.lambda_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github

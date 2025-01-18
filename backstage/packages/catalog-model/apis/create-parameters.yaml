@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: Create-Parameters
+  description: Serviço para criação de novos parameters
+  tags:
+    - python
+    - lambda
+  links:
+    - url: https://github.com/uoledtech-infra-as-code/tf-api-services
+      title: GitHub Repo
+      icon: github
+spec:
+  type: serveless
+  lifecycle: production
+  owner: squad-plataforma
+  definition:
+    $text: ./create-parameters.yaml 

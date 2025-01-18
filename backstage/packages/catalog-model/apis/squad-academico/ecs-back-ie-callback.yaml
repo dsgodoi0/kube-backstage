@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ECS-back-ie-callback
+  description: Squad Acadêmico
+  tags:
+    - nestjs
+    - javascript
+    - node-14
+  links:
+    - url: https://back-ie-callback-hmg.edtech.com.br
+      title: URI Develop
+      icon: code
+    - url: https://github.com/uoledtech-opm/callback-matriculas-ie-backend/tree/main
+      title: GitHub Main
+      icon: github
+    - url: https://github.com/uoledtech-opm/callback-matriculas-ie-backend/tree/homolog
+      title: GitHub Homolog
+      icon: github
+    - url: https://github.com/uoledtech-opm/callback-matriculas-ie-backend/tree/develop
+      title: GitHub Develop
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: squad-academico
+  definition:
+    $text: ./ecs-back-ie-callback.yaml

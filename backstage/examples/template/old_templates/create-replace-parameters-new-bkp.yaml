@@ -1,0 +1,189 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Replace-Parameter-New
+  title: Criar/Alterar Parameter (New)
+  description: Realize a consulta de parameters por ambiente (New)
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - Ambiente
+      properties:
+        Ambiente:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione um dos ambientes para realizar a criação do parameter desejado
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "118005465082"
+          enumNames:
+            - 'Instituição de Ensino - Desenvolvimento'
+            - 'Instituição de Ensino - Homologação'
+            - 'Hub - Desenvolvimento'
+            - 'Hub - Homologação'
+            - Edtech - Hub
+
+    - title: Parameter
+      required:
+        - Chave
+        - Valor
+        - Descricao
+        - SecureString
+        - Action     
+      properties:
+        Action:
+          title: Selecione uma opção
+          type: string
+          description: Selecione "create" para criação de um novo parameter, "replace" para de alterar de um parameter existente. 
+          enum: ['create', 'replace']
+          enumNames: ['criar', 'alterar']
+        Chave:
+          title: Chave
+          type: string
+          pattern: '^/(dev|hmg|prod)/[a-zA-Z0-9_/-]+$'
+          maxLength: 120
+          description: adiocione a chave (path) do parameter que deseja criar, exemplo:"/hmg/opm-ie/endpoints/pool_id"
+          ui:help: 'Não pode conter acentuação e deve respeitar o limite total de 120 caracteres.'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        Valor:
+          title: Valor
+          type: string
+          pattern: '^[a-zA-Z0-9_/.:-]+$'
+          maxLength: 120
+          description: adiocione o valor que o parameter deve receber
+          ui:help: 'Não pode conter acentuação e deve respeitar o limite total de 120 caracteres.'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        Descricao:
+          title: Descrição
+          type: string
+          maxLength: 120
+          description: adiocione uma descrição do parameter
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        SecureString:
+          title: SecureString
+          type: boolean
+          description: marque "Yes", caso o valor do parameter se trate de um dado sensível e precise ser ocultado (pass, key, secret etc..) 
+          ui:widget: radio
+        
+
+
+  steps:  
+
+    - id: template
+      name: Render Parameter
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/teste-backstage-pr/
+        values:
+          url           : 'https://api-parameter-edtech-hub.edtech.com.br/${{ parameters.Action }}'
+          content-type  : 'application/json'
+          authorization : 'AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE'
+          account_id    : '${{ parameters.Ambiente }}'
+          key           : '${{ parameters.Chave }}'
+          value         : '${{ parameters.Valor }}'
+          description   : '${{ parameters.Descricao }}'
+          type          : '${{ parameters.SecureString }}'
+          #
+          grupo         : '${{ parameters.grupo }}'
+          action        : '${{ parameters.Action }}'
+
+
+    - id: terraform_pr
+      name: Create/Replace Parameters
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=teste-backstage-pr
+        branchName: 'feat${{ parameters.Chave }}'
+        title: '🔩 Parameter ${{ parameters.Action }} : ${{ parameters.Chave }}'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+
+          |        |		   |
+          | ------ | ----- |
+          | Ação         | ${{ parameters.Action }}
+          | Parameter    | ${{ parameters.Chave }} 
+          | Valor        | ${{ parameters.Valor }}
+          | Descricao    | ${{ parameters.Descricao }}
+          | SecureString | ${{ parameters.SecureString }}
+
+          --- ---
+          ### 🚀 Para proseguir realize o Merge pull request.
+          ```
+          ${{ steps['template'].output.tag }}
+          ```
+        sourcePath: ./
+        targetPath: ./
+
+  # output:
+  #   links:
+  #     - title: 'Go to pull request'
+  #       url: ${{ steps.terraform_pr.output.remoteUrl }}
+  #       icon: github
+  #   text:
+  #     - title: More information
+  #       content: |
+  #         **Entity URL:** `${{ steps['template'].output.tag }}`
+
+    # - id: backstage_request_post
+    #   name: backstage request
+    #   action: http:backstage:request
+    #   input:
+    #     method: 'POST'
+    #     path: '/proxy/post_edtech_hub_parameter/${{ parameters.Action }}'
+    #     headers:
+    #       content-type: 'application/json'
+    #       Authorization: 'AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE'
+    #     body:
+    #       key: '${{ parameters.Chave }}'
+    #       value: '${{ parameters.Valor }}'
+    #       description: '${{ parameters.Descricao }}'
+    #       type: '${{ parameters.SecureString }}'
+    #       account_id: '${{ parameters.Ambiente }}'
+    #       action: ${{ parameters.Action }}
+    #       grupo: ${{ parameters.grupo }}
+    #       url: 'https://www.uoledtech.com.br'
+    # - id: log-message
+    #   name: Log Message
+    #   action: debug:log
+    #   input:
+    #     Result: ${{ steps.backstage_request_post.output.body }}
+
+
+  # output:
+  #   getResponse: '{{ steps.backstage_request.output.body }}'
+  #   getCode: '{{ steps.backstage_request.output.code }}'
+  #   getHeaders: '{{ steps.backstage_request.output.headers }}'

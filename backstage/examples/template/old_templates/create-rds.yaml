@@ -1,0 +1,930 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-RDS
+  title: Criação de RDS
+  description: Realize a criação de um RDS
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - account_id
+      properties:
+        account_id:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione o ambiente que deseja realizar a criação do novo recurso
+          enum:
+            - "002382960105"
+            - "333955165884"
+            - "647703120685"
+            - "057422990009"
+            - "978185330044"
+            - "853597464445"
+            - "690033744245"
+            - "592353520627"
+            - "992382650049"
+            - "948424637866"
+            - "302878384879"
+            - "192393990768"
+            - "579579651374"
+            - "020521381911"
+          enumNames:
+            - Instituição de Ensino - Desenvolvimento
+            - Instituição de Ensino - Homologação
+            - Hub - Desenvolvimento
+            - Hub - Homologação
+            - Hub - Produção
+            - Instituição de Ensino - PUCRS
+            - Instituição de Ensino - FAAP
+            - Instituição de Ensino - UNINASSAU
+            - Instituição de Ensino - Santa Casa
+            - PUCRS - PÓS
+            - PUCRS PÓS - Homologação
+            - FIA
+            - FIA - Homologação
+            - UNESC
+
+    - title: Tags de Ambiente
+      required: [ ambiente, subarea ]
+      properties:
+        ambiente:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: [ "develop", "homolog", "production"]
+        subarea:
+          title: Selecione a Tag Referente ao Ambiente
+          type: string
+          description: selecione a Tag Referente ao Ambiente
+          enum: ["ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "hub-prod", "ie-pucrs", "ie-faap", "ie-uninassau", "ie-santa-casa", "ie-unesc", "pucrs-pos-prod", "pucrs-pos-hmg", "fia-pos-prod", "fia-pos-hmg", "unesc-pos-prod", "unesc-pos-hmg"]
+
+    - title: RDS
+      required: [ resource_name, vpc_id, instance_type, rds_engine, engine_version, parameter_group_family ]
+      properties:
+        resource_name:
+          title: RDS Name
+          type: string
+          description: Defina um nome para a RDS
+          pattern: '^db-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+          ui:help: 'O nome da RDS deve começar com: "db-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+        vpc_id:
+          title: VPC ID
+          type: string
+          description: Defina em qual VPC o recurso será provisionado
+          #pattern: '^rds-(.*)-(ie-dev|ie-hmg|hub-dev|hub-hmg|fia|fia-hmg|pucrs-pos|pucrs-pos-hmg|prod)$'
+          #ui:help: 'O nome da RDS deve começar com: "rds-" e terminar com uma das opções a seguir: "ie-dev", "ie-hmg", "hub-dev", "hub-hmg", "prod", "fia", "fia-hmg", "pucrs-pos", "pucrs-pos-hmg"'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+        instance_type:
+          title: Instance Type
+          type: string
+          description: Defina o tipo de instância
+          default: "db.t3.medium"
+          enum:
+            - "db.t3.small"
+            - "db.t3.medium"
+            - "db.t3.large"
+            - "db.t4g.small"
+            - "db.t4g.medium"
+            - "db.t4g.large"
+            - "db.m5.large"
+            - "db.m5.xlarge"
+            - "db.m6g.large"
+            - "db.m6g.xlarge"
+
+        rds_engine:
+          title: RDS Engine
+          type: string
+          description: Defina a Engine do RDS
+          enum:
+            - "mysql"
+            - "mariadb"
+            - "postgres"
+
+        engine_version:
+          title: RDS Engine Version
+          type: string
+          description: Defina a Versão da Engine
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+
+        parameter_group_family:
+          title: Parameter Group Family
+          type: string
+          description: Defina o Parameter Group Family
+          default: "mysql5.7"
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        
+        # region:
+        #   title: Region
+        #   type: string
+        #   default: "us-east-1"
+        #   enum:
+        #     - "us-east-1"
+
+        # storage_type:
+        #   title: Storage Type
+        #   type: string
+        #   description: Defina o tipo de disco (GP2 Default)
+        #   default: "gp2"
+        #   enum:
+        #    - "gp2"
+        #    - "gp3"
+
+        # storage:
+        #   title: Storage 
+        #   type: string
+        #   description: Defina o tamanho do storge
+        #   default: "50"
+        #   enum:
+        #    - "50"
+        #    - "75"
+        #    - "100"
+
+        # multi_az:
+        #   title: Multi AZ 
+        #   description: Marque em caso de Multi AZ
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+        
+        # publicly_accessible:
+        #   title: Publicly Accessible 
+        #   description: Marque em caso de RDS Público
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+
+        # storage_encrypted:
+        #   title: Storage Encrypted
+        #   description: Marque em caso de Encriptação do Disco
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: 
+
+        # auto_version_upgrade:
+        #   title: Auto Version Upgrade
+        #   description: Marque em caso de manutenção de upgrade automático
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+
+        # apply_immediately:
+        #   title: Apply Immediately
+        #   description: Marque para aplicar as configurações imediatamente após a criação do RDS
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+
+        # skip_final_snapshot:
+        #   title: Skip Final Snapshot
+        #   description: Marque para pular o snapshot final após deleção do RDS
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+
+        # ca_cert_identifier:
+        #   title: CA Cert Identifier
+        #   type: string
+        #   description: Defina a CA Cert Identifier
+        #   default: "rds-ca-2019"
+        #   ui:
+        #     autofocus: true
+        #     options:
+        #       rows: 5
+
+        # performance_insights_enabled:
+        #   title: Performance Insights Enabled
+        #   description: Marque para habilitar Performance Insights
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+
+        # true_options:
+        #   title: True Options
+        #   description: Marque em caso de True Options
+        #   default: false
+        #   type: boolean
+        #   ui:
+        #     widget: radio
+
+        # backup_window:
+        #   title: Backup Window 
+        #   type: string
+        #   description: Defina a janela de backup
+        #   default: "19:00-20:00"
+        #   enum:
+        #    - "19:00-20:00"
+        #    - "20:00-21:00"
+        #    - "21:00-22:00"
+        #    - "22:00-23:00"
+        #    - "23:00-00:00"
+        #    - "00:00-01:00"
+        #    - "01:00-02:00"
+  
+        # backup_retention_period:
+        #   title: Backup Retention Period
+        #   type: string
+        #   description: Defina a retenção do backup
+        #   default: "19:00-20:00"
+        #   enum:
+        #    - "7"
+        #    - "14"
+        #    - "21"
+        #    - "30"
+
+        # maintenance_window:
+        #   title: Maintenance Window
+        #   type: string
+        #   description: Defina a janela de manutenção
+        #   default: "Mon:00:00-Mon:03:00"
+        #   ui:
+        #     autofocus: true
+        #     options:
+        #       rows: 5
+
+        # monitoring_interval:
+        #   title: Monitoring Interval
+        #   type: string
+        #   description: Defina o intervalo de monitoração
+        #   default: "0"
+        #   ui:
+        #     autofocus: true
+        #     options:
+        #       rows: 5
+          
+
+    # - title: Choose a location
+    #   properties:
+    #     repoUrl:
+    #       title: GitAuth
+    #       type: string
+    #       default: github.com
+    #       readOnly: true
+    #       ui:options:
+    #         requestUserCredentials:
+    #           secretsKey: USER_OAUTH_TOKEN
+    #         allowedHosts:
+    #           - github.com
+
+  steps:          
+    - id: template
+      if: ${{ parameters.account_id === "002382960105" }} #ie-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/develop%2Bhomolog/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-0e5b78700e8226fa9"
+          #
+          area          : "opm"
+          ambiente      : "develop"
+          subarea       : ${{ parameters.subarea }} # "ie"
+          #
+          key           : "edtech-payer/opm/ie-dev/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "ie-dev"
+
+        
+    - id: template
+      if: ${{ parameters.account_id === "333955165884" === "front"}} #ie-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/develop%2Bhomolog/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-052886cd3a4a3e7a1"
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea       : ${{ parameters.subarea }} # "ie"
+          #   
+          key           : "edtech-payer/opm/ie-hmg/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "ie-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "647703120685" }} #hub-dev
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/develop%2Bhomolog/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-0da2cd947dca3a599"
+          #
+          area          : "opm"
+          ambiente      : "develop"
+          subarea       : ${{ parameters.subarea }} # "hub"
+          # 
+          key           : "edtech-payer/opm/hub-dev/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "hub-dev"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #hub-hmg
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/develop%2Bhomolog/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-084594573c4168e25"
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea       : ${{ parameters.subarea }} # "hub"
+          # 
+          key           : "edtech-payer/opm/hub-hmg/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "hub-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "978185330044" }} #hub-prod
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-id"
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea       : ${{ parameters.subarea }} # "hub"
+          #
+          key           : "edtech-payer/opm/hub-prod/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "hub-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "853597464445" }} #IE PUCRS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-036ce5b424075c72b"
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea       : ${{ parameters.subarea }} # "puc-grad"
+          # 
+          key                        : "edtech-payer/opm/ie-pucrs/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag                        : "pucrs-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "690033744245" }} #IE FAAP
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-02f084583839458de"
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea       : ${{ parameters.subarea }} # "faap"
+          #
+          key           : "edtech-payer/opm/ie-faap/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "faap-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "057422990009" }} #IE UNINASSAU
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-00927db38c9ba6864"
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea       : ${{ parameters.subarea }} # "uninassau"
+          #
+          key           : "edtech-payer/opm/ie-uninassau/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "uninassau-prod"
+    
+    - id: template
+      if: ${{ parameters.account_id === ""948424637866"" }} #PUC POS
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-0398eccfb4bf5d0ae"
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea       : ${{ parameters.subarea }} # "pucrs-pos"
+          #
+          key           : "edtech-payer/opm/pucrs-pos-prod/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "pucrs-pos-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "302878384879" }} #PUC POS HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/develop%2Bhomolog/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-018a34681e165085e"
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea       : ${{ parameters.subarea }} # "pucrs-pos"
+          #
+          key           : "edtech-payer/opm/pucrs-pos-hmg/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "pucrs-pos-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "192393990768" }} #FIA
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-00f0fc985f6bd1322"
+          #
+          area          : "opm"
+          ambiente      : "production"
+          subarea       : ${{ parameters.subarea }} # "fia"
+          #
+          key           : "edtech-payer/opm/fia-pos-prod/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "fia-prod"
+
+    - id: template
+      if: ${{ parameters.account_id === "579579651374" }} #FIA HMG
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/develop%2Bhomolog/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #vpc_id                       : "vpc-01c25bcb6673a9628"
+          #
+          area          : "opm"
+          ambiente      : "homolog"
+          subarea       : ${{ parameters.subarea }} # "fia"
+          #
+          key           : "edtech-payer/opm/fia-pos-hmg/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "fia-hmg"
+
+    - id: template
+      if: ${{ parameters.account_id === "992382650049" }} #Santa Casa
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #
+          area               : "opm"
+          ambiente           : "production"
+          subarea       : ${{ parameters.subarea }} # "santa-casa"
+          #
+          key           : "edtech-payer/opm/ie-santa-casa/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "santa-casa"
+
+    - id: template
+      if: ${{ parameters.account_id === "020521381911" }} #Unesc
+      name: Render terraform files
+      action: fetch:template
+      input:
+        targetPath: ./
+        url: https://github.com/uoledtech-infra-as-code/tf-aws-db-rds-instance/tree/main/production/module/skeleton/
+        values:
+          resource_name                : "${{ parameters.resource_name }}"
+          account_id                   : "${{ parameters.account_id }}"
+          instance_type                : "${{ parameters.instance_type }}"
+          rds_engine                   : "${{ parameters.rds_engine }}"
+          engine_version               : "${{ parameters.engine_version }}"
+          parameter_group_family       : "${{ parameters.parameter_group_family }}"
+          vpc_id                       : "${{ parameters.vpc_id }}"
+          #region                       : "${{ parameters.region }}"          
+          # storage_type                 : "${{ parameters.storage_type }}"
+          # storage                      : "${{ parameters.storage }}"
+          # multi_az                     : "${{ parameters.multi_az }}"
+          # publicly_accessible          : "${{ parameters.publicly_accessible }}"
+          # storage_encrypted            : "${{ parameters.storage_encrypted }}"
+          # auto_version_upgrade         : "${{ parameters.auto_version_upgrade }}"
+          # apply_immediately            : "${{ parameters.apply_immediately }}"
+          # skip_final_snapshot          : "${{ parameters.skip_final_snapshot }}"
+          # ca_cert_identifier           : "${{ parameters.ca_cert_identifier }}"
+          # performance_insights_enabled : "${{ parameters.performance_insights_enabled }}"
+          # true_options                 : "${{ parameters.true_options }}"
+          # backup_window                : "${{ parameters.backup_window }}"
+          # backup_retention_period      : "${{ parameters.backup_retention_period }}"
+          # maintenance_window           : "${{ parameters.maintenance_window }}"
+          # monitoring_interval          : "${{ parameters.monitoring_interval }}"
+          # domain_name                  : "edtech.com.br" 
+          #
+          area               : "opm"
+          ambiente           : "production"
+          subarea       : ${{ parameters.subarea }} # "unesc"
+          #
+          key           : "edtech-payer/opm/ie-unesc/backstage/rds/${{ parameters.resource_name }}/terraform.tfstate"
+          tag           : "unesc"
+
+    - id: show_workspace
+      name: Show workspace files
+      action: debug:log
+      input:
+        listWorkspace: true
+    
+    - id: terraform_pr
+      name: Create terraform PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=uoledtech-infra-as-code&repo=repositorio-versionamento
+        branchName: 'feat/${{ parameters.resource_name }}'
+        title: '🔩 Create ${{ parameters.resource_name }} AWS RDS'
+        token : ${{ secrets.USER_OAUTH_TOKEN }}
+        description: |
+          ## ⚡ OPM - Platform Engineering ⚡
+
+          ![N|Solid](https://hub-certificados-dev-assets.edtech.com.br/project-arrow/arrow_logo_v2.png)
+          --- ---
+          ### Dados da Solicitação
+          
+          |        |		   |
+          | ------ | ----- |
+          | RDS    | ${{ parameters.resource_name }} 
+          | Squad  | ${{ parameters.grupo }}
+
+          --- ---
+          ### 🚀 Para proseguir com provisionamento siga os passos abaixo:
+          ### 1º - Execute o comando abaixo no campo de comentário, para planejar o recurso:
+          ```
+          atlantis plan -d tf-aws-${{ parameters.subarea }}/data-store/rds/tf-${{ parameters.resource_name }}
+          ```
+          ### 2º - Execute o comando abaixo no campo de comentário, para provisionar o recurso:
+          ```
+          atlantis apply -d tf-aws-${{ parameters.subarea }}/data-store/rds/tf-${{ parameters.resource_name }}
+          ```
+
+        #description: '${{ parameters.grupo }} | user: ${{ secrets.USER_OAUTH_TOKEN }}'
+        #commitMessage: 'atlantis plan -d lambda/lambda-vpc-and-sqs/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}'
+        sourcePath: ./
+        targetPath: tf-aws-${{ parameters.subarea }}/data-store/rds/tf-${{ parameters.resource_name }}
+        #targetPath: rds-instance/backstage/${{ parameters.ambiente }}/${{ parameters.subarea }}/tf-${{ parameters.resource_name }}
+
+  output:
+    links:
+      - title: 'Go to pull request'
+        url: ${{ steps.terraform_pr.output.remoteUrl }}
+        icon: github
+      - title: 'To view more check documentation'
+        icon: docs
+        url: ${{ steps.template.tag }}

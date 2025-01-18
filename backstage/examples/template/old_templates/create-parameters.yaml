@@ -1,0 +1,123 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Create-Parameter
+  title: Criação de Parameter
+  description: Realize a consulta de parameters por ambiente
+spec:
+  owner: squad-plataforma
+  type: infra-as-code
+  parameters:
+    - title: Grupo
+      required:
+        - grupo
+      properties:
+        grupo:
+          title: Grupo
+          type: string
+          description: Selecione a Squad
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+    - title: Ambiente
+      required:
+        - Ambiente
+      properties:
+        Ambiente:
+          title: Selecione o Ambiente
+          type: string
+          description: selecione um dos ambientes para realizar a criação do parameter desejado
+          enum:
+            - ie-dev
+            - ie-hmg
+            - hub-dev
+            - hub-hmg
+          enumNames:
+            - 'Instituição de Ensino - Desenvolvimento'
+            - 'Instituição de Ensino - Homologação'
+            - 'Hub - Desenvolvimento'
+            - 'Hub - Homologação'
+
+    - title: Parameter
+      required:
+        - Chave
+        - Valor
+        - Descricao
+        - SecureString        
+      properties:
+        Action:
+          type: string
+          default: create
+          ui:widget: hidden
+        Chave:
+          title: Chave
+          type: string
+          pattern: '^/(dev|hmg|prod)/[a-zA-Z0-9_/-]+$'
+          maxLength: 120
+          description: adiocione a chave (path) do parameter que deseja criar, exemplo:"/hmg/opm-ie/endpoints/pool_id"
+          ui:help: 'Não pode conter acentuação e deve respeitar o limite total de 120 caracteres.'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        Valor:
+          title: Valor
+          type: string
+          pattern: '^[a-zA-Z0-9_/.:-]+$'
+          maxLength: 120
+          description: adiocione o valor que o parameter deve receber
+          ui:help: 'Não pode conter acentuação e deve respeitar o limite total de 120 caracteres.'
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        Descricao:
+          title: Descrição
+          type: string
+          maxLength: 120
+          description: adiocione uma descrição do parameter
+          ui:
+            autofocus: true
+            options:
+              rows: 5
+        SecureString:
+          title: SecureString
+          type: boolean
+          description: marque "Yes", caso o valor do parameter se trate de um dado sensível e precise ser ocultado (pass, key, secret etc..) 
+          ui:widget: radio
+        
+
+
+  steps:  
+
+    - id: backstage_request_post
+      name: backstage request
+      action: http:backstage:request
+      input:
+        method: 'POST'
+        path: '/proxy/post_edtech_hub/backstage/parameters'
+        headers:
+          content-type: 'application/json'
+          Authorization: 'AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE'
+        body:
+          key: '${{ parameters.Chave }}'
+          value: '${{ parameters.Valor }}'
+          description: '${{ parameters.Descricao }}'
+          type: '${{ parameters.SecureString }}'
+          ambiente: '${{ parameters.Ambiente }}'
+          action: ${{ parameters.Action }}
+          grupo: ${{ parameters.grupo }}
+          
+    - id: log-message
+      name: Log Message
+      action: debug:log
+      input:
+        Result: ${{ steps.backstage_request_post.output.body }}
+
+
+  output:
+    getResponse: '{{ steps.backstage_request.output.body }}'
+    getCode: '{{ steps.backstage_request.output.code }}'
+    getHeaders: '{{ steps.backstage_request.output.headers }}'

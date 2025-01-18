@@ -1,0 +1,286 @@
+app:
+  title: Platform Engineering - OPM
+  baseUrl: https://backstage.edtech.com.br
+
+organization:
+  name: Platform Engineering - OPM
+
+backend:
+  # Used for enabling authentication, secret is shared by all backend plugins
+  # See https://backstage.io/docs/auth/service-to-service-auth for
+  # information on the format
+  # auth:
+  #   keys:
+  #     - secret: ${BACKEND_SECRET}
+  baseUrl: https://backstage.edtech.com.br
+  listen:
+    port: 7007
+    # Uncomment the following host directive to bind to specific interfaces
+    # host: 127.0.0.1
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+    # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
+    # Default Helmet Content-Security-Policy values can be removed by setting the key to false
+  cors:
+    origin: https://backstage.edtech.com.br
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  # This is for local development only, it is not recommended to use this in production
+  # The production database configuration is stored in app-config.production.yaml
+  database:
+    client: pg
+    connection:
+      host: rds-hub.cm3hhljkr3ah.us-east-1.rds.amazonaws.com
+      port: 5432
+      user: ${DB_USER}
+      password: ${DB_PASS}
+      # https://node-postgres.com/features/ssl
+      # you can set the sslmode configuration option via the `PGSSLMODE` environment variable
+      # see https://www.postgresql.org/docs/current/libpq-ssl.html Table 33.1. SSL Mode Descriptions (e.g. require)
+      # ssl:
+      #   ca: # if you have a CA file and want to verify it you can uncomment this section
+      #     $file: <file-path>/ca/server.crt
+
+  
+    #client: better-sqlite3
+    #connection: ':memory:'
+  # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
+
+integrations:
+  github:
+    - host: github.com
+      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
+      # about setting up the GitHub integration here: https://backstage.io/docs/getting-started/configuration#setting-up-a-github-integration
+      token: ${INTEGRATIONS_GITHUB_TOKEN}
+    ### Example for how to add your GitHub Enterprise instance using the API:
+    # - host: ghe.example.net
+    #   apiBaseUrl: https://ghe.example.net/api/v3
+    #   token: ${GHE_TOKEN}
+
+auth:
+  environment: development
+  providers:
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+        signIn:
+          resolvers:
+            - resolver: usernameMatchingUserEntityName
+
+proxy:
+  ### Example for how to add a proxy endpoint for the frontend.
+  ### A typical reason to do this is to handle HTTPS and CORS for internal services.
+   '/get_ie_dev':
+     target: 'https://api-services-ie-dev.edtech.com.br'
+     Content-Type: 'application/json'
+     allowedHeaders: ['value']
+  
+   '/get_ie_hmg':
+     target: 'https://api-services-ie-hmg.edtech.com.br'
+     Content-Type: 'application/json'
+     allowedHeaders: ['value']
+  
+   '/get_hub_dev':
+     target: 'https://api-services-hub-dev.edtech.com.br'
+     Content-Type: 'application/json'
+     allowedHeaders: ['value']
+  
+   '/get_hub_hmg':
+     target: 'https://api-services-hub-hmg.edtech.com.br'
+     Content-Type: 'application/json'
+     allowedHeaders: ['value']
+  # Create Parameters
+   '/post_edtech_hub':
+     target: 'https://api-arrow.edtech.com.br'
+     headers:
+      Authorization: AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE
+      Content-Type: 'application/json'
+  # Create Parameters Create/Replace New
+   '/post_edtech_hub_parameter':
+     target: 'https://api-parameter-edtech-hub.edtech.com.br'
+     headers:
+      Authorization:  AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE
+      Content-Type: 'application/json'
+  # Create Repositório Github
+   '/post_edtech_hub_github':
+     target: 'https://api-github-edtech-hub.edtech.com.br'
+     headers:
+      Authorization:  AqZDo0bF41Q9rg2Q55UeTNZXj5PhmE
+      Content-Type: 'application/json'
+  # Automation QA
+   '/automation-qa':
+     target: 'https://api-automation-qa-edtech-hub.edtech.com.br'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-user-dev':
+     target: 'https://back-hub-inst-ensino-dev.edtech.com.br/api/users'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-matricula-dev':
+     target: 'https://back-hub-matricula-dev.edtech.com.br/api'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-cliente-dev':
+     target: 'https://back-hub-clientes-dev.edtech.com.br/api'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-hub-integration-dev':
+     target: 'https://back-hub-cursos-dev.edtech.com.br/api'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-supervisores-dev':
+     target: 'https://back-ie-supervisores-dev.edtech.com.br/v1'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-autorizacao-dev':
+     target: 'https://back-ie-autorizacao-dev.edtech.com.br/api'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+   '/automation-qa-cognito-dev':
+     target: 'https://back-ie-cognito-dev.edtech.com.br/v1'
+     allowedHeaders: ['value']
+     headers:
+        Content-Type: 'application/json'
+
+# Reference documentation http://backstage.io/docs/features/techdocs/configuration
+# Note: After experimenting with basic setup, use CI/CD to generate docs
+# and an external cloud storage when deploying TechDocs for production use-case.
+# https://backstage.io/docs/features/techdocs/how-to-guides#how-to-migrate-from-techdocs-basic-to-recommended-deployment-approach
+techdocs:
+  builder: 'local' # Alternatives - 'external'
+  generator:
+    runIn: 'docker' # Alternatives - 'local'
+  publisher:
+    type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
+
+
+scaffolder:
+  # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+catalog:
+  rules:
+    - allow: [Component, System, API, Resource,Location, Template, User]
+  locations:
+    # Local example data, file locations are relative to the backend process, typically `packages/backend`
+    #- type: file
+    #  target: ./examples/entities.yaml
+    
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/get-parameters.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-sqs.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-lambda-event-bridge.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-ecs-service.yaml
+    
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-lambda-sqs.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-vpc.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-rds.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-cluster.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-listener_rule_443_tg.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/load_balancer_listener_rule_80_redirect.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-nlb.yaml
+    
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-route-api-gateway.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-api-gateway-key.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/load-balancer-all-resources.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-lambda-event-bridge-s3.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-route-sqs.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-route-vpc-link.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-rest_api.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-lambda-only.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-rest-api-lambda.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-route-lambda.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-replace-parameters-new.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-bucket-s3.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-document-db.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-repositorio.yaml
+  
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-repositorio-nestjs.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-repositorio-lambda.yaml
+
+    - type : url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/load-balancer-listener-80-443-redirect.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/automation-qa-operador.yaml
+  
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/automation-qa-cliente.yaml
+
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/automation-qa-aluno.yaml
+    
+    - type: url
+      target: https://github.com/uoledtech-infra-as-code/backstage-templates/blob/main/create-sns.yaml
+
+    # Local example organizational data
+    #- type: file
+    #  target: ./examples/org.yaml
+    #  rules:
+    #    - allow: [User, Group]
+
+    ## Uncomment these lines to add more example data
+    - type: url
+      target: https://github.com/uoledtech-opm/backstage-catalog/blob/main/all.yaml
+
+    ## Uncomment these lines to add an example org
+    - type: url
+      target: https://github.com/uoledtech-opm/backstage-catalog/blob/main/acme-corp.yaml
+      rules:
+        - allow: [User, Group]
